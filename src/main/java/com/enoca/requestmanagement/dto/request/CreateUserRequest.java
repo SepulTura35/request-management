@@ -17,12 +17,12 @@ public record CreateUserRequest(
         String lastName,
 
         @NotBlank(message = "E-posta zorunludur")
-        @Email(message = "Gecerli bir e-posta adresi giriniz")
+        @Email(message = "Geçerli bir e-posta adresi giriniz")
         @Size(max = 150, message = "E-posta en fazla 150 karakter olabilir")
         String email,
 
-        @NotBlank(message = "Sifre zorunludur")
-        @Size(min = 8, max = 100, message = "Sifre en az 8 karakter olmalidir")
+        @NotBlank(message = "Şifre zorunludur")
+        @Size(min = 8, max = 100, message = "Şifre en az 8 karakter olmalıdır")
         String password,
 
         @NotNull(message = "Rol zorunludur")

@@ -38,7 +38,7 @@ public class RemoteWorkRequestDetailHandler implements RequestDetailHandler {
 
     private void apply(RemoteWorkRequestDetail detail, CreateRemoteWorkRequestDto dto) {
         if (dto.endDate().isBefore(dto.startDate())) {
-            throw new BusinessRuleException("Bitis tarihi baslangic tarihinden once olamaz");
+            throw new BusinessRuleException("Bitiş tarihi başlangıç tarihinden önce olamaz");
         }
 
         detail.setStartDate(dto.startDate());

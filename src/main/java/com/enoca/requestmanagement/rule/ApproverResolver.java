@@ -22,7 +22,7 @@ public class ApproverResolver {
                 .filter(candidate -> !candidate.getId().equals(request.getRequester().getId()))
                 .min(Comparator.comparing(User::getId))
                 .orElseThrow(() -> new BusinessRuleException(
-                        "Bu adim icin uygun bir onaycı bulunamadi: " + approverRole));
+                        "Bu adım için uygun bir onaycı bulunamadı: " + approverRole));
     }
 
     private List<User> candidatesFor(Role approverRole, Request request) {

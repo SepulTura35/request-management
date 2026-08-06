@@ -26,7 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/requests/{requestId}")
 @RequiredArgsConstructor
-@Tag(name = "Talep Yorumlari", description = "Talep uzerindeki yorumlar ve islem gecmisi")
+@Tag(name = "Talep Yorumlari", description = "Talep üzerindeki yorumlar ve işlem geçmişi")
 public class RequestCommentController {
 
     private final CommentService commentService;
@@ -43,14 +43,14 @@ public class RequestCommentController {
     }
 
     @GetMapping("/comments")
-    @Operation(summary = "Talebin yorumlarini getirir")
+    @Operation(summary = "Talebin yorumlarını getirir")
     public ResponseEntity<List<CommentResponse>> listComments(@PathVariable Long requestId,
                                                               @AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.ok(commentService.findByRequest(requestId, principal.getUser()));
     }
 
     @GetMapping("/audit")
-    @Operation(summary = "Talep uzerinde yapilan tum islemlerin kaydini getirir")
+    @Operation(summary = "Talep üzerinde yapılan tüm işlemlerin kaydını getirir")
     public ResponseEntity<List<AuditLogResponse>> listAudit(@PathVariable Long requestId,
                                                             @AuthenticationPrincipal CustomUserDetails principal) {
         requestService.findById(requestId, principal.getUser());

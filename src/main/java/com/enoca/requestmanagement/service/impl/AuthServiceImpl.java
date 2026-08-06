@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new BusinessRuleException("Bu e-posta adresi zaten kayitli: " + request.email());
+            throw new BusinessRuleException("Bu e-posta adresi zaten kayıtlı: " + request.email());
         }
 
         Department department = departmentRepository.findByCode(request.departmentCode())
@@ -57,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
 
         eventPublisher.publishEvent(AuditEvent.of(
                 AuditAction.USER_REGISTERED, "User", saved.getId(), saved.getId(),
-                "Yeni kullanici kaydi: " + saved.getEmail()));
+                "Yeni kullanıcı kaydı: " + saved.getEmail()));
 
         return toAuthResponse(saved);
     }

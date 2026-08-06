@@ -51,7 +51,7 @@ class RequestDetailHandlerTest {
         assertThatThrownBy(() -> leaveHandler.toEntity(
                 leaveDto(LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 1))))
                 .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("Bitis tarihi");
+                .hasMessageContaining("Bitiş tarihi");
     }
 
     @Test

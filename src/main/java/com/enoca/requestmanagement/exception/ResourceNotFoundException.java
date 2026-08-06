@@ -7,6 +7,6 @@ public class ResourceNotFoundException extends RuntimeException {
     }
 
     public static ResourceNotFoundException of(String resource, Object identifier) {
-        return new ResourceNotFoundException(resource + " bulunamadi: " + identifier);
+        return new ResourceNotFoundException(resource + " bulunamadı: " + identifier);
     }
 }

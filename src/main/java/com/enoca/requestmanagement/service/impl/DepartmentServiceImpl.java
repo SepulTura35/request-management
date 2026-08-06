@@ -24,7 +24,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Transactional
     public DepartmentResponse create(CreateDepartmentRequest request) {
         if (departmentRepository.existsByCode(request.code())) {
-            throw new BusinessRuleException("Bu departman kodu zaten kullaniliyor: " + request.code());
+            throw new BusinessRuleException("Bu departman kodu zaten kullanılıyor: " + request.code());
         }
 
         Department department = Department.builder()

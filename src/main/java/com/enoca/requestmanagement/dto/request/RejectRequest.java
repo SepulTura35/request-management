@@ -5,8 +5,8 @@ import jakarta.validation.constraints.Size;
 
 public record RejectRequest(
 
-        @NotBlank(message = "Red gerekcesi zorunludur")
-        @Size(max = 1000, message = "Red gerekcesi en fazla 1000 karakter olabilir")
+        @NotBlank(message = "Red gerekçesi zorunludur")
+        @Size(max = 1000, message = "Red gerekçesi en fazla 1000 karakter olabilir")
         String comment
 ) {
 }

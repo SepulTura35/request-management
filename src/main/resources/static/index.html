@@ -8,10 +8,26 @@
 </head>
 <body>
 
+<header class="titlebar">
+    <div class="titlebar-brand">
+        <span class="brand-mark">TO</span>
+        <span class="titlebar-title">Talep ve Onay Yönetimi</span>
+    </div>
+
+    <div id="titlebar-user" class="titlebar-user" hidden>
+        <span id="user-initials" class="avatar"></span>
+        <span class="user-meta">
+            <strong id="user-name"></strong>
+            <small id="user-role"></small>
+        </span>
+        <button id="logout-button" class="btn btn-sm">Çıkış yap</button>
+    </div>
+</header>
+
 <div id="login-screen" class="login-screen">
     <form id="login-form" class="login-card" autocomplete="on">
         <div class="login-head">
-            <h1>Talep ve Onay Yönetimi</h1>
+            <h1>Oturum açın</h1>
             <p>Devam etmek için kurumsal hesabınızla giriş yapın.</p>
         </div>
 
@@ -49,23 +65,7 @@
 
 <div id="app-shell" class="app-shell" hidden>
     <aside class="sidebar">
-        <div class="brand">
-            <span class="brand-mark">TO</span>
-            <span class="brand-text">Talep &amp; Onay</span>
-        </div>
-
         <nav id="main-nav" class="nav"></nav>
-
-        <div class="sidebar-foot">
-            <div class="user-card">
-                <span id="user-initials" class="avatar"></span>
-                <span class="user-meta">
-                    <strong id="user-name"></strong>
-                    <small id="user-role"></small>
-                </span>
-            </div>
-            <button id="logout-button" class="btn btn-ghost btn-block">Çıkış yap</button>
-        </div>
     </aside>
 
     <main class="content">

@@ -14,19 +14,19 @@ public record CreateLeaveRequestDto(
         @NotNull(message = "Talep tipi zorunludur")
         RequestType requestType,
 
-        @NotBlank(message = "Aciklama zorunludur")
-        @Size(max = 1000, message = "Aciklama en fazla 1000 karakter olabilir")
+        @NotBlank(message = "Açıklama zorunludur")
+        @Size(max = 1000, message = "Açıklama en fazla 1000 karakter olabilir")
         String description,
 
         Priority priority,
 
-        @NotNull(message = "Izin tipi zorunludur")
+        @NotNull(message = "İzin tipi zorunludur")
         LeaveType leaveType,
 
-        @NotNull(message = "Baslangic tarihi zorunludur")
+        @NotNull(message = "Başlangıç tarihi zorunludur")
         LocalDate startDate,
 
-        @NotNull(message = "Bitis tarihi zorunludur")
+        @NotNull(message = "Bitiş tarihi zorunludur")
         LocalDate endDate
 
 ) implements CreateRequestDto {

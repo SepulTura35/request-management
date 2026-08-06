@@ -18,7 +18,7 @@ public class ApprovalRuleEngineRegistry {
             ApprovalRuleEngine previous = engines.put(engine.supportedType(), engine);
             if (previous != null) {
                 throw new IllegalStateException(
-                        "Ayni talep tipi icin birden fazla onay kurali tanimli: " + engine.supportedType());
+                        "Aynı talep tipi için birden fazla onay kuralı tanımlı: " + engine.supportedType());
             }
         });
     }
@@ -26,7 +26,7 @@ public class ApprovalRuleEngineRegistry {
     public ApprovalRuleEngine resolve(RequestType requestType) {
         ApprovalRuleEngine engine = engines.get(requestType);
         if (engine == null) {
-            throw new BusinessRuleException("Bu talep tipi icin onay kurali tanimli degil: " + requestType);
+            throw new BusinessRuleException("Bu talep tipi için onay kuralı tanımlı değil: " + requestType);
         }
         return engine;
     }

@@ -35,7 +35,7 @@ import java.util.List;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-@Tag(name = "Yonetim", description = "Kullanici ve departman yonetimi (yalnizca ADMIN)")
+@Tag(name = "Yönetim", description = "Kullanıcı ve departman yönetimi (yalnızca ADMIN)")
 public class AdminController {
 
     private final UserService userService;
@@ -43,53 +43,53 @@ public class AdminController {
     private final AuditService auditService;
 
     @GetMapping("/users")
-    @Operation(summary = "Kullanicilari sayfali olarak listeler")
+    @Operation(summary = "Kullanıcıları sayfalı olarak listeler")
     public ResponseEntity<PageResponse<UserResponse>> listUsers(
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.ASC) Pageable pageable) {
         return ResponseEntity.ok(userService.findAll(pageable));
     }
 
     @GetMapping("/users/{id}")
-    @Operation(summary = "Tek bir kullaniciyi getirir")
+    @Operation(summary = "Tek bir kullanıcıyı getirir")
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.findById(id));
     }
 
     @PostMapping("/users")
-    @Operation(summary = "Belirtilen rolde yeni kullanici olusturur")
+    @Operation(summary = "Belirtilen rolde yeni kullanıcı oluşturur")
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.create(request));
     }
 
     @PatchMapping("/users/{id}/role")
-    @Operation(summary = "Kullanicinin rolunu degistirir")
+    @Operation(summary = "Kullanıcının rolünü değiştirir")
     public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id,
                                                        @Valid @RequestBody UpdateUserRoleRequest request) {
         return ResponseEntity.ok(userService.updateRole(id, request));
     }
 
     @PatchMapping("/users/{id}/status")
-    @Operation(summary = "Kullaniciyi aktif veya pasif yapar")
+    @Operation(summary = "Kullanıcıyı aktif veya pasif yapar")
     public ResponseEntity<UserResponse> updateUserStatus(@PathVariable Long id,
                                                          @RequestParam boolean active) {
         return ResponseEntity.ok(userService.setActive(id, active));
     }
 
     @GetMapping("/audit-logs")
-    @Operation(summary = "Sistem genelindeki islem kayitlarini sayfali olarak listeler")
+    @Operation(summary = "Sistem genelindeki işlem kayıtlarını sayfalı olarak listeler")
     public ResponseEntity<PageResponse<AuditLogResponse>> listAuditLogs(
             @PageableDefault(size = 30) Pageable pageable) {
         return ResponseEntity.ok(auditService.findAll(pageable));
     }
 
     @GetMapping("/departments")
-    @Operation(summary = "Tum departmanlari listeler")
+    @Operation(summary = "Tüm departmanları listeler")
     public ResponseEntity<List<DepartmentResponse>> listDepartments() {
         return ResponseEntity.ok(departmentService.findAll());
     }
 
     @PostMapping("/departments")
-    @Operation(summary = "Yeni departman olusturur")
+    @Operation(summary = "Yeni departman oluşturur")
     public ResponseEntity<DepartmentResponse> createDepartment(
             @Valid @RequestBody CreateDepartmentRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(departmentService.create(request));

@@ -30,13 +30,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/requests")
 @RequiredArgsConstructor
-@Tag(name = "Talepler", description = "Talep olusturma ve yonetimi")
+@Tag(name = "Talepler", description = "Talep oluşturma ve yönetimi")
 public class RequestController {
 
     private final RequestService requestService;
 
     @PostMapping
-    @Operation(summary = "Talep tipine gore yeni bir talep olusturur (taslak)")
+    @Operation(summary = "Talep tipine göre yeni bir talep oluşturur (taslak)")
     public ResponseEntity<RequestResponse> create(@Valid @RequestBody CreateRequestDto dto,
                                                   @AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -44,7 +44,7 @@ public class RequestController {
     }
 
     @GetMapping
-    @Operation(summary = "Oturum acan kullanicinin kendi taleplerini listeler")
+    @Operation(summary = "Oturum açan kullanıcının kendi taleplerini listeler")
     public ResponseEntity<PageResponse<RequestResponse>> listMyRequests(
             @RequestParam(required = false) RequestStatus status,
             @RequestParam(required = false) RequestType requestType,
@@ -55,14 +55,14 @@ public class RequestController {
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Talep detayini ve onay gecmisini getirir")
+    @Operation(summary = "Talep detayını ve onay geçmişini getirir")
     public ResponseEntity<RequestResponse> getById(@PathVariable Long id,
                                                    @AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.ok(requestService.findById(id, principal.getUser()));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Taslak durumundaki bir talebi gunceller")
+    @Operation(summary = "Taslak durumundaki bir talebi günceller")
     public ResponseEntity<RequestResponse> update(@PathVariable Long id,
                                                   @Valid @RequestBody CreateRequestDto dto,
                                                   @AuthenticationPrincipal CustomUserDetails principal) {
@@ -70,7 +70,7 @@ public class RequestController {
     }
 
     @PostMapping("/{id}/submit")
-    @Operation(summary = "Talebi onaya gonderir ve talep tipine gore onay zincirini olusturur")
+    @Operation(summary = "Talebi onaya gönderir ve talep tipine göre onay zincirini oluşturur")
     public ResponseEntity<RequestResponse> submit(@PathVariable Long id,
                                                   @AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.ok(requestService.submit(id, principal.getUser()));
