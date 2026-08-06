@@ -16,7 +16,6 @@ import com.enoca.requestmanagement.exception.BusinessRuleException;
 import com.enoca.requestmanagement.exception.ResourceNotFoundException;
 import com.enoca.requestmanagement.mapper.RequestResponseMapper;
 import com.enoca.requestmanagement.repository.ApprovalStepRepository;
-import com.enoca.requestmanagement.repository.RequestRepository;
 import com.enoca.requestmanagement.rule.ApproverResolver;
 import com.enoca.requestmanagement.service.ApprovalService;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +34,6 @@ import java.util.Optional;
 public class ApprovalServiceImpl implements ApprovalService {
 
     private final ApprovalStepRepository approvalStepRepository;
-    private final RequestRepository requestRepository;
     private final ApproverResolver approverResolver;
     private final RequestResponseMapper requestResponseMapper;
     private final ApplicationEventPublisher eventPublisher;
@@ -104,9 +102,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 
     private ApprovalStep loadActionableStep(Long stepId, User approver) {
         ApprovalStep step = approvalStepRepository.findByIdWithRequest(stepId)
-                .orElseThrow(() -> ResourceNotFoundException.of("Onay adimi", stepId));
-
-        requestRepository.findByIdForUpdate(step.getRequest().getId());
+                .orElseThrow(() -> ResourceNotFoundException.of("Onay adımı", stepId));
 
         if (step.getApprover() == null || !step.getApprover().getId().equals(approver.getId())) {
             throw new AccessDeniedException("Bu onay adımı size atanmamış");

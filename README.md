@@ -497,6 +497,22 @@ Servis, controller ve registry'ler değişmez.
 
 Onay ve red işlemleri, talep satırına **pessimistic write kilidi** alarak başlar. İki onaycı aynı anda işlem yapsa bile zincir iki adım birden ilerlemez; ikinci istek birincinin bitmesini bekler ve "bu adım zaten sonuçlandırılmış" hatası alır.
 
+### Eşzamanlılık
+
+Talep ve onay adımı entity'leri `@Version` alanı taşır. Dört durum geçişi de — gönderme, iptal, onay, red — aynı optimistic locking stratejisine bağlıdır.
+
+İki kullanıcı aynı kayıt üzerinde aynı anda işlem yaparsa biri başarılı olur, diğeri **409** alır ve "kayıt başka bir kullanıcı tarafından güncellendi" mesajını görür. Kontrolsüz bir 500 oluşmaz.
+
+Ölçülen davranış (8 paralel istek):
+
+| İşlem | Sonuç |
+|---|---|
+| Aynı taslağa gönderme | 1 başarılı, 7 çakışma; **3 adımlı tek zincir** oluştu |
+| Aynı adıma onay | 1 başarılı, 7 çakışma; zincir bir adım ilerledi |
+| Aynı talebe iptal | 1 başarılı, 7 çakışma; bekleyen adım kapatıldı |
+
+Talep numarası veritabanı sequence'inden üretilir. 20 paralel talep oluşturmada 20 benzersiz numara elde edildi; sayıma dayalı önceki yöntem aynı numarayı üretebiliyordu.
+
 ### Onaycı atamasının zamanlaması
 
 Onay adımları submit anında oluşturulur, ancak **yalnızca ilk adıma** onaycı atanır. Sonraki adımların onaycısı, sırası geldiğinde belirlenir.

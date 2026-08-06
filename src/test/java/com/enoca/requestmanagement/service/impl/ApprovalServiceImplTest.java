@@ -14,7 +14,6 @@ import com.enoca.requestmanagement.enums.Role;
 import com.enoca.requestmanagement.exception.BusinessRuleException;
 import com.enoca.requestmanagement.mapper.RequestResponseMapper;
 import com.enoca.requestmanagement.repository.ApprovalStepRepository;
-import com.enoca.requestmanagement.repository.RequestRepository;
 import com.enoca.requestmanagement.rule.ApproverResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,8 +38,6 @@ class ApprovalServiceImplTest {
 
     @Mock
     private ApprovalStepRepository approvalStepRepository;
-    @Mock
-    private RequestRepository requestRepository;
     @Mock
     private ApproverResolver approverResolver;
     @Mock
@@ -81,7 +78,6 @@ class ApprovalServiceImplTest {
 
         when(approvalStepRepository.findByIdWithRequest(1L)).thenReturn(Optional.of(managerStep));
         when(approvalStepRepository.findByIdWithRequest(2L)).thenReturn(Optional.of(financeStep));
-        when(requestRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(request));
     }
 
     @Test
@@ -158,14 +154,5 @@ class ApprovalServiceImplTest {
         assertThatThrownBy(() -> approvalService.approve(1L, new ApproveRequest(null), manager))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("onay bekleyen durumda değil");
-    }
-
-    @Test
-    void takesAWriteLockOnTheRequestBeforeActing() {
-        when(approverResolver.resolve(Role.FINANCE, request)).thenReturn(finance);
-
-        approvalService.approve(1L, new ApproveRequest(null), manager);
-
-        org.mockito.Mockito.verify(requestRepository).findByIdForUpdate(1L);
     }
 }
