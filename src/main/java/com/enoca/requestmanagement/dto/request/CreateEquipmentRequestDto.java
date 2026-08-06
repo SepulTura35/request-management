@@ -18,8 +18,8 @@ public record CreateEquipmentRequestDto(
         @NotNull(message = "Talep tipi zorunludur")
         RequestType requestType,
 
-        @NotBlank(message = "Aciklama zorunludur")
-        @Size(max = 1000, message = "Aciklama en fazla 1000 karakter olabilir")
+        @NotBlank(message = "Açıklama zorunludur")
+        @Size(max = 1000, message = "Açıklama en fazla 1000 karakter olabilir")
         String description,
 
         Priority priority,
@@ -29,11 +29,11 @@ public record CreateEquipmentRequestDto(
 
         @NotNull(message = "Tahmini maliyet zorunludur")
         @DecimalMin(value = "0.01", message = "Tahmini maliyet sifirdan buyuk olmalidir")
-        @Digits(integer = 10, fraction = 2, message = "Tahmini maliyet en fazla 2 ondalik basamak icerebilir")
+        @Digits(integer = 10, fraction = 2, message = "Tahmini maliyet en fazla 2 ondalık basamak içerebilir")
         BigDecimal estimatedCost,
 
         @NotNull(message = "Adet zorunludur")
-        @Min(value = 1, message = "Adet en az 1 olmalidir")
+        @Min(value = 1, message = "Adet en az 1 olmalıdır")
         @Max(value = 100, message = "Adet en fazla 100 olabilir")
         Integer quantity
 

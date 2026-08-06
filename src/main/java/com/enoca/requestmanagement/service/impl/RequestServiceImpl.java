@@ -68,7 +68,7 @@ public class RequestServiceImpl implements RequestService {
         request.setDetail(handler.toEntity(dto));
 
         Request saved = requestRepository.save(request);
-        publish(AuditAction.REQUEST_CREATED, saved, requester, "Talep olusturuldu");
+        publish(AuditAction.REQUEST_CREATED, saved, requester, "Talep oluşturuldu");
 
         return toResponse(saved);
     }
@@ -79,10 +79,10 @@ public class RequestServiceImpl implements RequestService {
         Request request = getOwnedRequest(id, requester);
 
         if (request.getStatus() != RequestStatus.DRAFT) {
-            throw new BusinessRuleException("Yalnizca taslak durumundaki talepler duzenlenebilir");
+            throw new BusinessRuleException("Yalnızca taslak durumundaki talepler düzenlenebilir");
         }
         if (request.getRequestType() != dto.requestType()) {
-            throw new BusinessRuleException("Talep tipi degistirilemez");
+            throw new BusinessRuleException("Talep tipi değiştirilemez");
         }
 
         RequestDetailHandler handler = detailHandlerRegistry.resolve(dto.requestType());
@@ -91,7 +91,7 @@ public class RequestServiceImpl implements RequestService {
         request.setPriority(dto.priority() == null ? Priority.MEDIUM : dto.priority());
         handler.updateEntity(request.getDetail(), dto);
 
-        publish(AuditAction.REQUEST_UPDATED, request, requester, "Taslak guncellendi");
+        publish(AuditAction.REQUEST_UPDATED, request, requester, "Taslak güncellendi");
 
         return toResponse(request);
     }
@@ -102,14 +102,14 @@ public class RequestServiceImpl implements RequestService {
         Request request = getOwnedRequest(id, requester);
 
         if (request.getStatus() != RequestStatus.DRAFT) {
-            throw new BusinessRuleException("Yalnizca taslak durumundaki talepler gonderilebilir");
+            throw new BusinessRuleException("Yalnızca taslak durumundaki talepler gönderilebilir");
         }
 
         List<Role> approvalChain = approvalRuleRegistry.resolve(request.getRequestType())
                 .determineApprovalChain(request);
 
         if (approvalChain.isEmpty()) {
-            throw new BusinessRuleException("Bu talep icin onay zinciri olusturulamadi");
+            throw new BusinessRuleException("Bu talep için onay zinciri oluşturulamadı");
         }
 
         List<User> approvers = approvalChain.stream()
@@ -136,7 +136,7 @@ public class RequestServiceImpl implements RequestService {
         requestRepository.flush();
 
         publish(AuditAction.REQUEST_SUBMITTED, request, requester,
-                "Onaya gonderildi, zincir: " + approvalChain);
+                "Onaya gönderildi, zincir: " + approvalChain);
 
         return toResponse(request);
     }
@@ -190,7 +190,7 @@ public class RequestServiceImpl implements RequestService {
         request.setStatus(RequestStatus.CANCELLED);
         request.setResolvedAt(LocalDateTime.now());
 
-        publish(AuditAction.REQUEST_CANCELLED, request, requester, "Talep sahibi tarafindan iptal edildi");
+        publish(AuditAction.REQUEST_CANCELLED, request, requester, "Talep sahibi tarafından iptal edildi");
 
         return toResponse(request);
     }
@@ -202,7 +202,7 @@ public class RequestServiceImpl implements RequestService {
 
         if (request.getStatus() != RequestStatus.DRAFT) {
             throw new BusinessRuleException(
-                    "Yalnizca taslak durumundaki talepler silinebilir, gonderilmis talepler iptal edilmelidir");
+                    "Yalnızca taslak durumundaki talepler silinebilir, gönderilmiş talepler iptal edilmelidir");
         }
 
         publish(AuditAction.REQUEST_DELETED, request, requester,
@@ -216,7 +216,7 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> ResourceNotFoundException.of("Talep", id));
 
         if (!request.getRequester().getId().equals(requester.getId())) {
-            throw new AccessDeniedException("Bu talep uzerinde islem yapma yetkiniz yok");
+            throw new AccessDeniedException("Bu talep üzerinde işlem yapma yetkiniz yok");
         }
 
         return request;

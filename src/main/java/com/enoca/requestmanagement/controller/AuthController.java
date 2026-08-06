@@ -18,19 +18,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@Tag(name = "Kimlik Dogrulama", description = "Kayit ve giris islemleri")
+@Tag(name = "Kimlik Doğrulama", description = "Kayıt ve giriş işlemleri")
 public class AuthController {
 
     private final AuthService authService;
 
     @PostMapping("/register")
-    @Operation(summary = "Yeni kullanici kaydi olusturur ve JWT token doner")
+    @Operation(summary = "Yeni kullanıcı kaydı oluşturur ve JWT token döner")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping("/login")
-    @Operation(summary = "E-posta ve sifre ile giris yapar, JWT token doner")
+    @Operation(summary = "E-posta ve şifre ile giriş yapar, JWT token döner")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
     }

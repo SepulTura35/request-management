@@ -42,12 +42,12 @@ public class LeaveRequestDetailHandler implements RequestDetailHandler {
 
     private void apply(LeaveRequestDetail detail, CreateLeaveRequestDto dto) {
         if (dto.endDate().isBefore(dto.startDate())) {
-            throw new BusinessRuleException("Bitis tarihi baslangic tarihinden once olamaz");
+            throw new BusinessRuleException("Bitiş tarihi başlangıç tarihinden önce olamaz");
         }
 
         int totalDays = (int) ChronoUnit.DAYS.between(dto.startDate(), dto.endDate()) + 1;
         if (totalDays > MAX_LEAVE_DAYS) {
-            throw new BusinessRuleException("Izin talebi en fazla " + MAX_LEAVE_DAYS + " gun olabilir");
+            throw new BusinessRuleException("İzin talebi en fazla " + MAX_LEAVE_DAYS + " gün olabilir");
         }
 
         detail.setLeaveType(dto.leaveType());

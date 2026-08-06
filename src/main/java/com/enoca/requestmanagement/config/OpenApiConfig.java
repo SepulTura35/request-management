@@ -17,9 +17,9 @@ public class OpenApiConfig {
     public OpenAPI requestManagementOpenApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("Dinamik Talep ve Onay Yonetim Sistemi")
-                        .description("Calisanlarin talep olusturup, talep tipine gore belirlenen onay "
-                                + "zincirinden gecirdigi sistem")
+                        .title("Dinamik Talep ve Onay Yönetim Sistemi")
+                        .description("Çalışanların talep oluşturup, talep tipine göre belirlenen onay "
+                                + "zincirinden geçirdiği sistem")
                         .version("v1"))
                 .addSecurityItem(new SecurityRequirement().addList(BEARER_SCHEME))
                 .components(new Components().addSecuritySchemes(BEARER_SCHEME,

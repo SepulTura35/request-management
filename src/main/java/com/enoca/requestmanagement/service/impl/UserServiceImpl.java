@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse create(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new BusinessRuleException("Bu e-posta adresi zaten kayitli: " + request.email());
+            throw new BusinessRuleException("Bu e-posta adresi zaten kayıtlı: " + request.email());
         }
 
         User user = User.builder()

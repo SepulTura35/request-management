@@ -148,7 +148,7 @@ class ApprovalServiceImplTest {
 
         assertThatThrownBy(() -> approvalService.approve(1L, new ApproveRequest(null), manager))
                 .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("sonuclandirilmis");
+                .hasMessageContaining("sonuçlandırılmış");
     }
 
     @Test
@@ -157,7 +157,7 @@ class ApprovalServiceImplTest {
 
         assertThatThrownBy(() -> approvalService.approve(1L, new ApproveRequest(null), manager))
                 .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("onay bekleyen durumda degil");
+                .hasMessageContaining("onay bekleyen durumda değil");
     }
 
     @Test

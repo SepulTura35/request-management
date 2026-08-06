@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
-@Tag(name = "Kullanici", description = "Oturum acan kullanicinin kendi bilgileri")
+@Tag(name = "Kullanici", description = "Oturum açan kullanıcının kendi bilgileri")
 public class UserController {
 
     private final UserService userService;
 
     @GetMapping("/me")
-    @Operation(summary = "Oturum acan kullanicinin profilini getirir")
+    @Operation(summary = "Oturum açan kullanıcının profilini getirir")
     public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal CustomUserDetails principal) {
         return ResponseEntity.ok(userService.findById(principal.getId()));
     }

@@ -39,25 +39,25 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredentials(BadCredentialsException ex,
                                                               HttpServletRequest request) {
-        return build(HttpStatus.UNAUTHORIZED, "E-posta veya sifre hatali", request.getRequestURI());
+        return build(HttpStatus.UNAUTHORIZED, "E-posta veya şifre hatalı", request.getRequestURI());
     }
 
     @ExceptionHandler(DisabledException.class)
     public ResponseEntity<ErrorResponse> handleDisabled(DisabledException ex,
                                                         HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, "Hesabiniz pasif durumda", request.getRequestURI());
+        return build(HttpStatus.FORBIDDEN, "Hesabınız pasif durumda", request.getRequestURI());
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErrorResponse> handleAccessDenied(AccessDeniedException ex,
                                                             HttpServletRequest request) {
-        return build(HttpStatus.FORBIDDEN, "Bu islem icin yetkiniz bulunmuyor", request.getRequestURI());
+        return build(HttpStatus.FORBIDDEN, "Bu işlem için yetkiniz bulunmuyor", request.getRequestURI());
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex, HttpServletRequest request) {
         log.error("Beklenmeyen hata: {}", request.getRequestURI(), ex);
-        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Beklenmeyen bir hata olustu", request.getRequestURI());
+        return build(HttpStatus.INTERNAL_SERVER_ERROR, "Beklenmeyen bir hata oluştu", request.getRequestURI());
     }
 
     @Override
@@ -72,7 +72,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         ErrorResponse body = ErrorResponse.withValidationErrors(
                 HttpStatus.BAD_REQUEST.value(),
                 HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                "Gonderilen veri dogrulama kurallarina uymuyor",
+                "Gönderilen veri doğrulama kurallarına uymuyor",
                 pathOf(request),
                 fieldErrors);
 

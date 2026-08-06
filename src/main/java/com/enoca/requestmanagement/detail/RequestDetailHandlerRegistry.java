@@ -18,7 +18,7 @@ public class RequestDetailHandlerRegistry {
             RequestDetailHandler previous = handlers.put(handler.supportedType(), handler);
             if (previous != null) {
                 throw new IllegalStateException(
-                        "Ayni talep tipi icin birden fazla handler tanimli: " + handler.supportedType());
+                        "Aynı talep tipi için birden fazla handler tanımlı: " + handler.supportedType());
             }
         });
     }

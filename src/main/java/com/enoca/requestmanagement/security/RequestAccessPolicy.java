@@ -17,7 +17,7 @@ public class RequestAccessPolicy {
 
     public void ensureCanView(Request request, User viewer) {
         if (!canView(request, viewer)) {
-            throw new AccessDeniedException("Bu talebi goruntuleme yetkiniz yok");
+            throw new AccessDeniedException("Bu talebi görüntüleme yetkiniz yok");
         }
     }
 

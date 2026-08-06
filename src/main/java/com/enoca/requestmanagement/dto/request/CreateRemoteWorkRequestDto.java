@@ -13,20 +13,20 @@ public record CreateRemoteWorkRequestDto(
         @NotNull(message = "Talep tipi zorunludur")
         RequestType requestType,
 
-        @NotBlank(message = "Aciklama zorunludur")
-        @Size(max = 1000, message = "Aciklama en fazla 1000 karakter olabilir")
+        @NotBlank(message = "Açıklama zorunludur")
+        @Size(max = 1000, message = "Açıklama en fazla 1000 karakter olabilir")
         String description,
 
         Priority priority,
 
-        @NotNull(message = "Baslangic tarihi zorunludur")
+        @NotNull(message = "Başlangıç tarihi zorunludur")
         LocalDate startDate,
 
-        @NotNull(message = "Bitis tarihi zorunludur")
+        @NotNull(message = "Bitiş tarihi zorunludur")
         LocalDate endDate,
 
-        @NotBlank(message = "Calisma lokasyonu zorunludur")
-        @Size(max = 150, message = "Calisma lokasyonu en fazla 150 karakter olabilir")
+        @NotBlank(message = "Çalışma lokasyonu zorunludur")
+        @Size(max = 150, message = "Çalışma lokasyonu en fazla 150 karakter olabilir")
         String workLocation
 
 ) implements CreateRequestDto {

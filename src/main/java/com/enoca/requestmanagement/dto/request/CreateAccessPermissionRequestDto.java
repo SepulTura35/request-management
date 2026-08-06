@@ -12,21 +12,21 @@ public record CreateAccessPermissionRequestDto(
         @NotNull(message = "Talep tipi zorunludur")
         RequestType requestType,
 
-        @NotBlank(message = "Aciklama zorunludur")
-        @Size(max = 1000, message = "Aciklama en fazla 1000 karakter olabilir")
+        @NotBlank(message = "Açıklama zorunludur")
+        @Size(max = 1000, message = "Açıklama en fazla 1000 karakter olabilir")
         String description,
 
         Priority priority,
 
-        @NotBlank(message = "Sistem adi zorunludur")
-        @Size(max = 100, message = "Sistem adi en fazla 100 karakter olabilir")
+        @NotBlank(message = "Sistem adı zorunludur")
+        @Size(max = 100, message = "Sistem adı en fazla 100 karakter olabilir")
         String systemName,
 
-        @NotNull(message = "Erisim seviyesi zorunludur")
+        @NotNull(message = "Erişim seviyesi zorunludur")
         AccessLevel accessLevel,
 
-        @NotBlank(message = "Gerekce zorunludur")
-        @Size(max = 500, message = "Gerekce en fazla 500 karakter olabilir")
+        @NotBlank(message = "Gerekçe zorunludur")
+        @Size(max = 500, message = "Gerekçe en fazla 500 karakter olabilir")
         String justification
 
 ) implements CreateRequestDto {

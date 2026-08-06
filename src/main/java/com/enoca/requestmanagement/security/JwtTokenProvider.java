@@ -44,7 +44,7 @@ public class JwtTokenProvider {
             parseClaims(token);
             return true;
         } catch (JwtException | IllegalArgumentException ex) {
-            log.debug("Gecersiz JWT token: {}", ex.getMessage());
+            log.debug("Geçersiz JWT token: {}", ex.getMessage());
             return false;
         }
     }

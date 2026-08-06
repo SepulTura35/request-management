@@ -109,17 +109,17 @@ public class ApprovalServiceImpl implements ApprovalService {
         requestRepository.findByIdForUpdate(step.getRequest().getId());
 
         if (step.getApprover() == null || !step.getApprover().getId().equals(approver.getId())) {
-            throw new AccessDeniedException("Bu onay adimi size atanmamis");
+            throw new AccessDeniedException("Bu onay adımı size atanmamış");
         }
         if (step.getStatus() != ApprovalStepStatus.PENDING) {
-            throw new BusinessRuleException("Bu onay adimi zaten sonuclandirilmis: " + step.getStatus());
+            throw new BusinessRuleException("Bu onay adımı zaten sonuçlandırılmış: " + step.getStatus());
         }
         if (step.getRequest().getStatus() != RequestStatus.PENDING_APPROVAL) {
             throw new BusinessRuleException(
-                    "Talep onay bekleyen durumda degil: " + step.getRequest().getStatus());
+                    "Talep onay bekleyen durumda değil: " + step.getRequest().getStatus());
         }
         if (hasEarlierPendingStep(step)) {
-            throw new BusinessRuleException("Onceki onay adimlari henuz tamamlanmadi");
+            throw new BusinessRuleException("Önceki onay adımları henüz tamamlanmadı");
         }
 
         return step;

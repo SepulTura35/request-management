@@ -26,13 +26,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/approvals")
 @RequiredArgsConstructor
-@Tag(name = "Onaylar", description = "Onay ve red islemleri")
+@Tag(name = "Onaylar", description = "Onay ve red işlemleri")
 public class ApprovalController {
 
     private final ApprovalService approvalService;
 
     @GetMapping("/pending")
-    @Operation(summary = "Oturum acan kullaniciya atanmis, islem bekleyen onaylari listeler")
+    @Operation(summary = "Oturum açan kullanıcıya atanmış, işlem bekleyen onayları listeler")
     public ResponseEntity<PageResponse<PendingApprovalResponse>> listPending(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.ASC) Pageable pageable,
             @AuthenticationPrincipal CustomUserDetails principal) {
@@ -40,7 +40,7 @@ public class ApprovalController {
     }
 
     @GetMapping("/history")
-    @Operation(summary = "Oturum acan kullanicinin gecmis onay aksiyonlarini listeler")
+    @Operation(summary = "Oturum açan kullanıcının geçmiş onay aksiyonlarını listeler")
     public ResponseEntity<PageResponse<PendingApprovalResponse>> listHistory(
             @PageableDefault(size = 20, sort = "actionDate", direction = Sort.Direction.DESC) Pageable pageable,
             @AuthenticationPrincipal CustomUserDetails principal) {
@@ -48,7 +48,7 @@ public class ApprovalController {
     }
 
     @PostMapping("/{stepId}/approve")
-    @Operation(summary = "Onay adimini onaylar ve zinciri bir sonraki adima tasir")
+    @Operation(summary = "Onay adımını onaylar ve zinciri bir sonraki adıma taşır")
     public ResponseEntity<RequestResponse> approve(@PathVariable Long stepId,
                                                    @Valid @RequestBody(required = false) ApproveRequest action,
                                                    @AuthenticationPrincipal CustomUserDetails principal) {
@@ -57,7 +57,7 @@ public class ApprovalController {
     }
 
     @PostMapping("/{stepId}/reject")
-    @Operation(summary = "Onay adimini reddeder, aciklama zorunludur")
+    @Operation(summary = "Onay adımını reddeder, açıklama zorunludur")
     public ResponseEntity<RequestResponse> reject(@PathVariable Long stepId,
                                                   @Valid @RequestBody RejectRequest action,
                                                   @AuthenticationPrincipal CustomUserDetails principal) {
