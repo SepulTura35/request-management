@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Editor ve arac yapilandirmalari
+.claude/
+.idea/
+.vscode/
