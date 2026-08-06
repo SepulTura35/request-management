@@ -14,6 +14,8 @@ public interface RequestService {
 
     RequestResponse update(Long id, CreateRequestDto dto, User requester);
 
+    RequestResponse submit(Long id, User requester);
+
     RequestResponse findById(Long id, User viewer);
 
     PageResponse<RequestResponse> findMyRequests(User requester, RequestStatus status,

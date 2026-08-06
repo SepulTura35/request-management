@@ -6,9 +6,11 @@ import com.enoca.requestmanagement.dto.request.CreateRequestDto;
 import com.enoca.requestmanagement.dto.response.ApprovalStepResponse;
 import com.enoca.requestmanagement.dto.response.PageResponse;
 import com.enoca.requestmanagement.dto.response.RequestResponse;
+import com.enoca.requestmanagement.entity.ApprovalStep;
 import com.enoca.requestmanagement.entity.Request;
 import com.enoca.requestmanagement.entity.User;
 import com.enoca.requestmanagement.entity.detail.RequestDetail;
+import com.enoca.requestmanagement.enums.ApprovalStepStatus;
 import com.enoca.requestmanagement.enums.Priority;
 import com.enoca.requestmanagement.enums.RequestStatus;
 import com.enoca.requestmanagement.enums.RequestType;
@@ -16,6 +18,8 @@ import com.enoca.requestmanagement.enums.Role;
 import com.enoca.requestmanagement.exception.BusinessRuleException;
 import com.enoca.requestmanagement.exception.ResourceNotFoundException;
 import com.enoca.requestmanagement.repository.RequestRepository;
+import com.enoca.requestmanagement.rule.ApprovalRuleEngineRegistry;
+import com.enoca.requestmanagement.rule.ApproverResolver;
 import com.enoca.requestmanagement.service.RequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,6 +42,8 @@ public class RequestServiceImpl implements RequestService {
 
     private final RequestRepository requestRepository;
     private final RequestDetailHandlerRegistry detailHandlerRegistry;
+    private final ApprovalRuleEngineRegistry approvalRuleRegistry;
+    private final ApproverResolver approverResolver;
 
     @Override
     @Transactional
@@ -75,6 +81,46 @@ public class RequestServiceImpl implements RequestService {
         request.setDescription(dto.description());
         request.setPriority(dto.priority() == null ? Priority.MEDIUM : dto.priority());
         handler.updateEntity(request.getDetail(), dto);
+
+        return toResponse(request);
+    }
+
+    @Override
+    @Transactional
+    public RequestResponse submit(Long id, User requester) {
+        Request request = getOwnedRequest(id, requester);
+
+        if (request.getStatus() != RequestStatus.DRAFT) {
+            throw new BusinessRuleException("Yalnizca taslak durumundaki talepler gonderilebilir");
+        }
+
+        List<Role> approvalChain = approvalRuleRegistry.resolve(request.getRequestType())
+                .determineApprovalChain(request);
+
+        if (approvalChain.isEmpty()) {
+            throw new BusinessRuleException("Bu talep icin onay zinciri olusturulamadi");
+        }
+
+        List<User> approvers = approvalChain.stream()
+                .map(role -> approverResolver.resolve(role, request))
+                .toList();
+
+        for (int index = 0; index < approvalChain.size(); index++) {
+            ApprovalStep step = ApprovalStep.builder()
+                    .stepOrder(index + 1)
+                    .approverRole(approvalChain.get(index))
+                    .status(ApprovalStepStatus.PENDING)
+                    .build();
+
+            if (index == 0) {
+                step.setApprover(approvers.get(0));
+            }
+
+            request.addApprovalStep(step);
+        }
+
+        request.setStatus(RequestStatus.PENDING_APPROVAL);
+        request.setSubmittedAt(LocalDateTime.now());
 
         return toResponse(request);
     }

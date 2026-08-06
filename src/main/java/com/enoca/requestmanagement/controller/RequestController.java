@@ -69,6 +69,13 @@ public class RequestController {
         return ResponseEntity.ok(requestService.update(id, dto, principal.getUser()));
     }
 
+    @PostMapping("/{id}/submit")
+    @Operation(summary = "Talebi onaya gonderir ve talep tipine gore onay zincirini olusturur")
+    public ResponseEntity<RequestResponse> submit(@PathVariable Long id,
+                                                  @AuthenticationPrincipal CustomUserDetails principal) {
+        return ResponseEntity.ok(requestService.submit(id, principal.getUser()));
+    }
+
     @PostMapping("/{id}/cancel")
     @Operation(summary = "Talebi iptal eder")
     public ResponseEntity<RequestResponse> cancel(@PathVariable Long id,
