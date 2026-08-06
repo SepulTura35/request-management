@@ -21,8 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.access.AccessDeniedException;
 
@@ -33,7 +31,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class ApprovalServiceImplTest {
 
     @Mock
@@ -75,13 +72,11 @@ class ApprovalServiceImplTest {
         request.addApprovalStep(managerStep);
         request.addApprovalStep(financeStep);
         request.addApprovalStep(directorStep);
-
-        when(approvalStepRepository.findByIdWithRequest(1L)).thenReturn(Optional.of(managerStep));
-        when(approvalStepRepository.findByIdWithRequest(2L)).thenReturn(Optional.of(financeStep));
     }
 
     @Test
     void approvingHandsTheRequestToTheNextStep() {
+        when(approvalStepRepository.findByIdWithRequest(1L)).thenReturn(Optional.of(managerStep));
         when(approverResolver.resolve(Role.FINANCE, request)).thenReturn(finance);
 
         approvalService.approve(1L, new ApproveRequest("Butce uygun"), manager);
@@ -112,6 +107,8 @@ class ApprovalServiceImplTest {
 
     @Test
     void rejectingEndsTheRequestAndClosesUnreachedSteps() {
+        when(approvalStepRepository.findByIdWithRequest(1L)).thenReturn(Optional.of(managerStep));
+
         approvalService.reject(1L, new RejectRequest("Butce yetersiz"), manager);
 
         assertThat(request.getStatus()).isEqualTo(RequestStatus.REJECTED);
@@ -127,12 +124,16 @@ class ApprovalServiceImplTest {
 
     @Test
     void onlyTheAssignedApproverCanActOnAStep() {
+        when(approvalStepRepository.findByIdWithRequest(1L)).thenReturn(Optional.of(managerStep));
+
         assertThatThrownBy(() -> approvalService.approve(1L, new ApproveRequest(null), finance))
                 .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test
     void anUnassignedStepCannotBeActedOn() {
+        when(approvalStepRepository.findByIdWithRequest(2L)).thenReturn(Optional.of(financeStep));
+
         assertThatThrownBy(() -> approvalService.approve(2L, new ApproveRequest(null), finance))
                 .as("sirasi gelmemis adimin onaycisi henuz yok")
                 .isInstanceOf(AccessDeniedException.class);
@@ -140,6 +141,7 @@ class ApprovalServiceImplTest {
 
     @Test
     void aResolvedStepCannotBeActedOnTwice() {
+        when(approvalStepRepository.findByIdWithRequest(1L)).thenReturn(Optional.of(managerStep));
         managerStep.setStatus(ApprovalStepStatus.APPROVED);
 
         assertThatThrownBy(() -> approvalService.approve(1L, new ApproveRequest(null), manager))
@@ -149,6 +151,7 @@ class ApprovalServiceImplTest {
 
     @Test
     void stepsOfACancelledRequestCannotBeActedOn() {
+        when(approvalStepRepository.findByIdWithRequest(1L)).thenReturn(Optional.of(managerStep));
         request.setStatus(RequestStatus.CANCELLED);
 
         assertThatThrownBy(() -> approvalService.approve(1L, new ApproveRequest(null), manager))

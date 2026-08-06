@@ -126,11 +126,43 @@ openssl rand -base64 48
 
 Token süresi de `JWT_EXPIRATION_MS` ile değiştirilebilir (varsayılan 24 saat).
 
-### Testleri çalıştırma
+### Testler
 
-```bash
-./mvnw test
 ```
+Tests run: 84, Failures: 0, Errors: 0, Skipped: 5
+```
+
+| Test sınıfı | Adet | Kapsam |
+|---|---|---|
+| `ApprovalRuleEngineTest` | 21 | Beş talep tipinin onay eşikleri, eşiklerin yapılandırılabilirliği |
+| `ApproverResolverTest` | 6 | Rol → kişi çözümleme, kendi talebini onaylayamama, direktöre yükseltme |
+| `ApprovalRuleEngineRegistryTest` | 3 | Registry indeksleme, eksik tip, çift kayıt |
+| `RequestDetailHandlerTest` | 8 | Tip bazlı alan kuralları, gün hesabı, yerinde güncelleme |
+| `RequestServiceImplTest` | 8 | Submit zinciri, durum geçişleri, sahiplik |
+| `ApprovalServiceImplTest` | 7 | Onay / red, zincir ilerletme, dört koruma kuralı |
+| `DatabaseConstraintTest` | 6 | CHECK kısıtları, doğrudan veritabanı üzerinden |
+| `ConcurrencyIntegrationTest` | 4 | Paralel gönderme / onay / iptal, numara benzersizliği |
+| `ErrorResponseIntegrationTest` | 7 | Bozuk girdi, iç detay sızıntısı, çakışma |
+| `MigrationSafetyTest` | 4 | Demo verinin ortak klasöre sızmaması |
+| `RequestApprovalFlowIntegrationTest` | 4 | Uçtan uca gerçek uygulama |
+| `PostgresMigrationTest` | 5 | Gerçek PostgreSQL üzerinde şema, sequence, kısıtlar (Docker gerektirir) |
+| `RequestManagementApplicationTests` | 1 | Context yüklenmesi |
+
+Eşikler **tam sınır değerleriyle** test edilir: 3 gün / 4 gün, 1.000,00 / 1.000,01, 5.000,00 / 5.000,01. Ortadan seçilen bir değer, eşiğin bir birim kaymasını yakalamaz.
+
+Servis testleri metot çağrılarını değil **sonuç durumunu** doğrular. Mockito strict modda çalışır; kullanılmayan bir stub testi düşürür.
+
+Eşzamanlılık testleri gerçek bir HTTP sunucusuna paralel istek atar ve tam olarak bir isteğin başarılı olduğunu, kalanların 409 aldığını doğrular.
+
+Hata testleri yalnızca durum kodunu değil, cevabın `com.enoca`, `com.fasterxml`, `org.springframework` gibi iç detay taşımadığını da kontrol eder.
+
+`MigrationSafetyTest`, ortak migration klasörüne `INSERT INTO users` veya parola hash'i girmesini kalıcı olarak engeller.
+
+### PostgreSQL testleri (Testcontainers)
+
+`PostgresMigrationTest` gerçek bir PostgreSQL konteynerinde çalışır: production migration setinin eksiksiz uygulandığını, demo hesap oluşturmadığını, sequence'in ve CHECK kısıtlarının çalıştığını doğrular.
+
+Test `@Testcontainers(disabledWithoutDocker = true)` ile işaretlidir; Docker bulunmayan ortamda derlenir ama atlanır, build kırılmaz. Yukarıdaki `Skipped: 5` bundandır.
 
 ---
 
