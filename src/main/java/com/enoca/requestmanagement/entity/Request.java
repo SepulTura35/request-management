@@ -16,6 +16,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -36,6 +37,10 @@ import java.util.List;
 @Builder
 @ToString(of = {"requestNumber", "requestType", "status"})
 public class Request extends BaseEntity {
+
+    @Version
+    @Column(nullable = false)
+    private Long version;
 
     @Column(nullable = false, unique = true, length = 30)
     private String requestNumber;

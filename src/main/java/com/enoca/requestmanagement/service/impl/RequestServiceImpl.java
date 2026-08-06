@@ -228,9 +228,8 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private String nextRequestNumber() {
-        String prefix = "REQ-" + Year.now().getValue() + "-";
-        long sequence = requestRepository.countByRequestNumberPrefix(prefix) + 1;
-        return prefix + String.format("%04d", sequence);
+        long sequence = requestRepository.nextRequestNumberSequenceValue();
+        return "REQ-%d-%06d".formatted(Year.now().getValue(), sequence);
     }
 
     private RequestResponse toResponse(Request request) {
