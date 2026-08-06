@@ -75,14 +75,15 @@ a { color: var(--highlight); }
 .titlebar-brand { display: flex; align-items: center; gap: 9px; min-width: 0; }
 
 .brand-mark {
-    width: 20px; height: 20px;
-    display: grid; place-items: center;
-    background: var(--highlight);
-    color: #ffffff;
+    display: grid;
+    place-items: center;
+    padding: 4px 7px;
+    background: #ffffff;
     border-radius: var(--radius);
-    font-size: 10px; font-weight: 700; letter-spacing: 0.03em;
     flex-shrink: 0;
 }
+
+.brand-mark img { display: block; height: 13px; width: auto; }
 
 .titlebar-title {
     font-size: 12.5px;

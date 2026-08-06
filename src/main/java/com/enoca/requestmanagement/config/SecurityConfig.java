@@ -37,6 +37,7 @@ public class SecurityConfig {
             "/index.html",
             "/css/**",
             "/js/**",
+            "/img/**",
             "/favicon.ico"
     };
 
