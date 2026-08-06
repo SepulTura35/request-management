@@ -108,7 +108,7 @@ const UI = (() => {
     }
 
     function pager(page, onChange) {
-        if (!page || page.totalPages <= 1) return null;
+        if (!page || page.totalPages <= 1) return document.createDocumentFragment();
 
         return el('div', { class: 'pager' }, [
             el('span', {

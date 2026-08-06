@@ -350,6 +350,25 @@ Uygulama, bağımlılıksız bir web arayüzüyle birlikte gelir. Spring Boot'un
 
 Menü, oturum açan kullanıcının rolüne göre kurulur. Bu bir **kolaylık** katmanıdır, güvenlik katmanı değil: çalışan bir kullanıcı yönetim ekranına elle ulaşsa bile API 403 döner.
 
+### Tema
+
+Arayüz, [Qt-Frameless-Window-DarkStyle](https://github.com/Jorgen-VikingGod/Qt-Frameless-Window-DarkStyle) temasının paletini kullanır. Renkler ekran görüntüsünden değil, projenin `DarkStyle.cpp` dosyasındaki `QPalette` tanımlarından alınmıştır:
+
+| Qt rolü | Değer | Arayüzdeki karşılığı |
+|---|---|---|
+| Window | `#353535` | Gövde, paneller, butonlar |
+| Base | `#2a2a2a` | Kartlar, form girdileri |
+| AlternateBase | `#424242` | Tablo başlıkları |
+| Dark | `#232323` | Kenar çubuğu, sayfa başlığı |
+| Shadow | `#141414` | Başlık çubuğu, modal başlığı |
+| Highlight | `#2a82da` | Ana buton, aktif menü, odak |
+
+Temanın kendi ölçüleri de korunmuştur: 1px koyu kenarlık, 2px köşe yarıçapı, dar kontrol dolgusu.
+
+Sayfanın üstündeki koyu şerit, orijinal projedeki çerçevesiz pencerenin başlık çubuğuna karşılık gelir; solda uygulama adı, sağda oturum açan kullanıcı ve çıkış düğmesi yer alır. Taklit pencere düğmesi (küçült, kapat) eklenmemiştir — o şeritteki her kontrol gerçek bir işlev taşır.
+
+Qt'nin pasif metin tonu (`#7f7f7f`) yalnızca gerçekten pasif kontrollerde kullanılır. Kullanıcının okuması gereken metinler koyu zeminde en az 4.5:1 kontrast verecek şekilde ayarlanmıştır (WCAG AA).
+
 Form doğrulaması sunucudan beslenir. Arayüzde kural tekrarı yoktur; API'nin `validationErrors` cevabı ilgili alanın altına yazılır. Böylece kural tek yerde kalır.
 
 ---

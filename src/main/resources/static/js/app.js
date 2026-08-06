@@ -46,7 +46,7 @@
 
     function navigationItems() {
         const items = [
-            { section: 'Taleplerim' },
+            { section: 'Talepler' },
             { route: 'requests', label: 'Taleplerim' },
             { route: 'request-new', label: 'Yeni talep' }
         ];
