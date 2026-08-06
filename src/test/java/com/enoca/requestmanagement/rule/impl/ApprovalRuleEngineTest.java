@@ -8,12 +8,14 @@ import com.enoca.requestmanagement.entity.detail.RequestDetail;
 import com.enoca.requestmanagement.enums.AccessLevel;
 import com.enoca.requestmanagement.enums.RequestType;
 import com.enoca.requestmanagement.enums.Role;
+import com.enoca.requestmanagement.rule.ApprovalThresholdProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,6 +25,9 @@ class ApprovalRuleEngineTest {
     private static final Department DEPARTMENT = TestFixtures.department(1L, "IT");
     private static final User REQUESTER = TestFixtures.user(1L, Role.EMPLOYEE, DEPARTMENT);
 
+    private static final ApprovalThresholdProperties DEFAULTS = new ApprovalThresholdProperties(
+            3, new BigDecimal("1000"), new BigDecimal("5000"), new BigDecimal("50000"), 5);
+
     private static Request requestWith(RequestType type, RequestDetail detail) {
         return TestFixtures.request(1L, type, REQUESTER, detail);
     }
@@ -31,7 +36,7 @@ class ApprovalRuleEngineTest {
     @DisplayName("Izin talebi")
     class Leave {
 
-        private final LeaveApprovalRule rule = new LeaveApprovalRule();
+        private final LeaveApprovalRule rule = new LeaveApprovalRule(DEFAULTS);
 
         @Test
         void supportsLeaveType() {
@@ -66,7 +71,7 @@ class ApprovalRuleEngineTest {
     @DisplayName("Masraf talebi")
     class Expense {
 
-        private final ExpenseApprovalRule rule = new ExpenseApprovalRule();
+        private final ExpenseApprovalRule rule = new ExpenseApprovalRule(DEFAULTS);
 
         @Test
         void atThresholdStaysWithManager() {
@@ -101,7 +106,7 @@ class ApprovalRuleEngineTest {
     @DisplayName("Ekipman talebi")
     class Equipment {
 
-        private final EquipmentApprovalRule rule = new EquipmentApprovalRule();
+        private final EquipmentApprovalRule rule = new EquipmentApprovalRule(DEFAULTS);
 
         @Test
         void alwaysIncludesInformationTechnology() {
@@ -132,7 +137,7 @@ class ApprovalRuleEngineTest {
     @DisplayName("Uzaktan calisma talebi")
     class RemoteWork {
 
-        private final RemoteWorkApprovalRule rule = new RemoteWorkApprovalRule();
+        private final RemoteWorkApprovalRule rule = new RemoteWorkApprovalRule(DEFAULTS);
 
         @Test
         void fiveDaysNeedsOnlyManager() {
@@ -145,6 +150,42 @@ class ApprovalRuleEngineTest {
         void sixDaysAddsHumanResources() {
             assertThat(rule.determineApprovalChain(
                     requestWith(RequestType.REMOTE_WORK, TestFixtures.remoteWorkDetail(6))))
+                    .containsExactly(Role.MANAGER, Role.HR);
+        }
+    }
+
+    @Nested
+    @DisplayName("Esikler yapilandirmadan okunuyor")
+    class ConfiguredThresholds {
+
+        @Test
+        void raisingTheExpenseThresholdChangesTheChain() {
+            Request request = requestWith(RequestType.EXPENSE, TestFixtures.expenseDetail("3000.00"));
+
+            assertThat(new ExpenseApprovalRule(DEFAULTS).determineApprovalChain(request))
+                    .as("varsayilan esikle finans onayi gerekiyor")
+                    .containsExactly(Role.MANAGER, Role.FINANCE);
+
+            ApprovalThresholdProperties raised = new ApprovalThresholdProperties(
+                    3, new BigDecimal("5000"), new BigDecimal("20000"), new BigDecimal("50000"), 5);
+
+            assertThat(new ExpenseApprovalRule(raised).determineApprovalChain(request))
+                    .as("esik yukseltilince ayni tutar yalnizca yoneticiye gidiyor")
+                    .containsExactly(Role.MANAGER);
+        }
+
+        @Test
+        void loweringTheLeaveThresholdChangesTheChain() {
+            Request request = requestWith(RequestType.LEAVE, TestFixtures.leaveDetail(3));
+
+            assertThat(new LeaveApprovalRule(DEFAULTS).determineApprovalChain(request))
+                    .containsExactly(Role.MANAGER);
+
+            ApprovalThresholdProperties lowered = new ApprovalThresholdProperties(
+                    2, new BigDecimal("1000"), new BigDecimal("5000"), new BigDecimal("50000"), 5);
+
+            assertThat(new LeaveApprovalRule(lowered).determineApprovalChain(request))
+                    .as("esik dusurulunce ayni izin IK onayina gidiyor")
                     .containsExactly(Role.MANAGER, Role.HR);
         }
     }

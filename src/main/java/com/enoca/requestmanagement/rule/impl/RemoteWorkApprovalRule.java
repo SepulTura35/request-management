@@ -5,15 +5,18 @@ import com.enoca.requestmanagement.entity.detail.RemoteWorkRequestDetail;
 import com.enoca.requestmanagement.enums.RequestType;
 import com.enoca.requestmanagement.enums.Role;
 import com.enoca.requestmanagement.rule.ApprovalRuleEngine;
+import com.enoca.requestmanagement.rule.ApprovalThresholdProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class RemoteWorkApprovalRule implements ApprovalRuleEngine {
 
-    static final long HR_APPROVAL_THRESHOLD_DAYS = 5;
+    private final ApprovalThresholdProperties thresholds;
 
     @Override
     public RequestType supportedType() {
@@ -25,7 +28,7 @@ public class RemoteWorkApprovalRule implements ApprovalRuleEngine {
         RemoteWorkRequestDetail detail = (RemoteWorkRequestDetail) request.getDetail();
         long totalDays = ChronoUnit.DAYS.between(detail.getStartDate(), detail.getEndDate()) + 1;
 
-        if (totalDays <= HR_APPROVAL_THRESHOLD_DAYS) {
+        if (totalDays <= thresholds.remoteWorkHrThresholdDays()) {
             return List.of(Role.MANAGER);
         }
         return List.of(Role.MANAGER, Role.HR);
