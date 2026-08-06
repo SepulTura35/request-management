@@ -8,6 +8,7 @@
     const pageActions = document.getElementById('page-actions');
     const pageBody = document.getElementById('page-body');
     const mainNav = document.getElementById('main-nav');
+    const titlebarUser = document.getElementById('titlebar-user');
 
     const APPROVER_ROLES = ['MANAGER', 'HR', 'FINANCE', 'IT', 'DIRECTOR'];
 
@@ -134,12 +135,14 @@
             `${Labels.role(user.role)} · ${user.departmentName}`;
         document.getElementById('user-initials').textContent = UI.initials(user.fullName);
 
+        titlebarUser.hidden = false;
         loginScreen.hidden = true;
         appShell.hidden = false;
     }
 
     function showLogin() {
         currentUser = null;
+        titlebarUser.hidden = true;
         appShell.hidden = true;
         loginScreen.hidden = false;
     }
