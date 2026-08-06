@@ -93,11 +93,18 @@ const UI = (() => {
     }
 
     function table(headers, rows) {
-        return el('table', { class: 'data-table' }, [
-            el('thead', {}, el('tr', {}, headers.map(h =>
-                el('th', { class: h.align === 'right' ? 'right' : null, text: h.label || h })))),
+        const headerCell = (header) => {
+            const classes = [header.align === 'right' ? 'right' : null, header.secondary ? 'col-secondary' : null];
+            return el('th', {
+                class: classes.filter(Boolean).join(' ') || null,
+                text: header.label || header
+            });
+        };
+
+        return el('div', { class: 'table-scroll' }, el('table', { class: 'data-table' }, [
+            el('thead', {}, el('tr', {}, headers.map(headerCell))),
             el('tbody', {}, rows)
-        ]);
+        ]));
     }
 
     function pager(page, onChange) {

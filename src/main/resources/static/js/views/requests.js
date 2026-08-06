@@ -162,17 +162,18 @@ const RequestViews = (() => {
             }, [
                 el('td', { class: 'num', text: request.requestNumber }),
                 el('td', { text: Labels.requestType(request.requestType) }),
-                el('td', { text: request.description }),
+                el('td', { class: 'col-secondary', text: request.description }),
                 el('td', {}, badge(Labels.requestStatus(request.status), Labels.statusBadge(request.status))),
-                el('td', {}, el('span', {
+                el('td', { class: 'col-secondary' }, el('span', {
                     class: `priority priority-${request.priority}`,
                     text: Labels.priority(request.priority)
                 })),
-                el('td', { class: 'num', text: UI.formatDate(request.createdAt) })
+                el('td', { class: 'num col-secondary', text: UI.formatDate(request.createdAt) })
             ]));
 
             results.append(
-                table(['Talep no', 'Tip', 'Açıklama', 'Durum', 'Öncelik', 'Oluşturma'], rows),
+                table(['Talep no', 'Tip', { label: 'Açıklama', secondary: true }, 'Durum',
+                    { label: 'Öncelik', secondary: true }, { label: 'Oluşturma', secondary: true }], rows),
                 UI.pager(page, next => { state.page = next; load(); })
             );
         }

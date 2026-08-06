@@ -26,9 +26,9 @@ const ApprovalViews = (() => {
                 })),
                 el('td', { text: Labels.requestType(item.requestType) }),
                 el('td', { text: item.requesterName }),
-                el('td', { text: item.description }),
+                el('td', { class: 'col-secondary', text: item.description }),
                 el('td', {}, badge(`${item.stepOrder}. adım · ${Labels.role(item.approverRole)}`, 'badge-accent')),
-                el('td', {}, el('span', {
+                el('td', { class: 'col-secondary' }, el('span', {
                     class: `priority priority-${item.priority}`, text: Labels.priority(item.priority)
                 })),
                 el('td', { class: 'right' }, el('div', { class: 'row-actions' }, [
@@ -45,7 +45,8 @@ const ApprovalViews = (() => {
 
             card.append(
                 table(
-                    ['Talep no', 'Tip', 'Talep sahibi', 'Açıklama', 'Adım', 'Öncelik', { label: 'İşlem', align: 'right' }],
+                    ['Talep no', 'Tip', 'Talep sahibi', { label: 'Açıklama', secondary: true }, 'Adım',
+                        { label: 'Öncelik', secondary: true }, { label: 'İşlem', align: 'right' }],
                     rows),
                 UI.pager(page, next => { state.page = next; load(); })
             );
