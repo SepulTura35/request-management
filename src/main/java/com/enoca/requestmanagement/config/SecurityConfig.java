@@ -32,6 +32,14 @@ public class SecurityConfig {
             "/api-docs/**"
     };
 
+    private static final String[] STATIC_RESOURCES = {
+            "/",
+            "/index.html",
+            "/css/**",
+            "/js/**",
+            "/favicon.ico"
+    };
+
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
@@ -40,6 +48,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(STATIC_RESOURCES).permitAll()
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Talep ve Onay Yönetimi</title>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+    <form id="login-form" class="login-card" autocomplete="on">
+        <div class="login-head">
+            <h1>Talep ve Onay Yönetimi</h1>
+            <p>Devam etmek için kurumsal hesabınızla giriş yapın.</p>
+        </div>
+
+        <label class="field">
+            <span>E-posta</span>
+            <input type="email" name="email" required autocomplete="username" placeholder="ad.soyad@enoca.com">
+        </label>
+
+        <label class="field">
+            <span>Parola</span>
+            <input type="password" name="password" required autocomplete="current-password">
+        </label>
+
+        <p id="login-error" class="form-error" hidden></p>
+
+        <button type="submit" class="btn btn-primary btn-block">Giriş yap</button>
+
+        <details class="demo-accounts">
+            <summary>Demo hesapları</summary>
+            <table>
+                <tbody>
+                <tr><td>mert.demir@enoca.com</td><td>Çalışan</td></tr>
+                <tr><td>ahmet.yilmaz@enoca.com</td><td>Yönetici (BT)</td></tr>
+                <tr><td>kerem.dogan@enoca.com</td><td>Finans</td></tr>
+                <tr><td>burak.ozturk@enoca.com</td><td>İnsan Kaynakları</td></tr>
+                <tr><td>elif.kaya@enoca.com</td><td>Bilgi Teknolojileri</td></tr>
+                <tr><td>canan.yildirim@enoca.com</td><td>Direktör</td></tr>
+                <tr><td>admin@enoca.com</td><td>Sistem yöneticisi</td></tr>
+                </tbody>
+            </table>
+            <p class="hint">Tümünün parolası: <code>Password123</code></p>
+        </details>
+    </form>
+</div>
+
+<div id="app-shell" class="app-shell" hidden>
+    <aside class="sidebar">
+        <div class="brand">
+            <span class="brand-mark">TO</span>
+            <span class="brand-text">Talep &amp; Onay</span>
+        </div>
+
+        <nav id="main-nav" class="nav"></nav>
+
+        <div class="sidebar-foot">
+            <div class="user-card">
+                <span id="user-initials" class="avatar"></span>
+                <span class="user-meta">
+                    <strong id="user-name"></strong>
+                    <small id="user-role"></small>
+                </span>
+            </div>
+            <button id="logout-button" class="btn btn-ghost btn-block">Çıkış yap</button>
+        </div>
+    </aside>
+
+    <main class="content">
+        <header class="content-head">
+            <div>
+                <h2 id="page-title"></h2>
+                <p id="page-subtitle" class="page-subtitle"></p>
+            </div>
+            <div id="page-actions" class="page-actions"></div>
+        </header>
+
+        <section id="page-body" class="page-body"></section>
+    </main>
+</div>
+
+<div id="modal-root" class="modal-root" hidden></div>
+<div id="toast-root" class="toast-root"></div>
+
+<script src="js/api.js"></script>
+<script src="js/labels.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/views/requests.js"></script>
+<script src="js/views/approvals.js"></script>
+<script src="js/views/admin.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
