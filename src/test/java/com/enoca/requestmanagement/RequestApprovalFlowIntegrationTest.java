@@ -6,6 +6,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -47,11 +48,12 @@ class RequestApprovalFlowIntegrationTest {
         return objectMapper.readTree(body).get("token").asText();
     }
 
-    private JsonNode postJson(String url, String token, String payload) throws Exception {
+    private JsonNode postJson(String url, String token, String payload, HttpStatus expectedStatus) throws Exception {
         String body = mockMvc.perform(post(url)
                         .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
+                .andExpect(status().is(expectedStatus.value()))
                 .andReturn().getResponse().getContentAsString();
 
         return objectMapper.readTree(body);
@@ -68,11 +70,11 @@ class RequestApprovalFlowIntegrationTest {
         JsonNode created = postJson("/api/requests", employee, """
                 {"requestType":"EXPENSE","description":"Konferans","amount":12000.00,
                  "expenseCategory":"TRAINING"}
-                """);
+                """, HttpStatus.CREATED);
         long requestId = created.get("id").asLong();
         assertThat(created.get("status").asText()).isEqualTo("DRAFT");
 
-        JsonNode submitted = postJson("/api/requests/" + requestId + "/submit", employee, "");
+        JsonNode submitted = postJson("/api/requests/" + requestId + "/submit", employee, "", HttpStatus.OK);
         assertThat(submitted.get("status").asText()).isEqualTo("PENDING_APPROVAL");
         assertThat(submitted.get("approvalSteps")).hasSize(3);
 
@@ -81,15 +83,15 @@ class RequestApprovalFlowIntegrationTest {
         long directorStep = submitted.get("approvalSteps").get(2).get("id").asLong();
 
         assertThat(postJson("/api/approvals/" + managerStep + "/approve", manager,
-                "{\"comment\":\"Uygun\"}").get("status").asText())
+                "{\"comment\":\"Uygun\"}", HttpStatus.OK).get("status").asText())
                 .isEqualTo("PENDING_APPROVAL");
 
         assertThat(postJson("/api/approvals/" + financeStep + "/approve", finance,
-                "{\"comment\":\"Kontrol edildi\"}").get("status").asText())
+                "{\"comment\":\"Kontrol edildi\"}", HttpStatus.OK).get("status").asText())
                 .isEqualTo("PENDING_APPROVAL");
 
         JsonNode finished = postJson("/api/approvals/" + directorStep + "/approve", director,
-                "{\"comment\":\"Onaylandi\"}");
+                "{\"comment\":\"Onaylandi\"}", HttpStatus.OK);
 
         assertThat(finished.get("status").asText()).isEqualTo("APPROVED");
         assertThat(finished.get("resolvedAt").isNull()).isFalse();
@@ -109,9 +111,9 @@ class RequestApprovalFlowIntegrationTest {
         long requestId = postJson("/api/requests", employee, """
                 {"requestType":"LEAVE","description":"Izin","leaveType":"ANNUAL",
                  "startDate":"2026-09-01","endDate":"2026-09-02"}
-                """).get("id").asLong();
+                """, HttpStatus.CREATED).get("id").asLong();
 
-        long stepId = postJson("/api/requests/" + requestId + "/submit", employee, "")
+        long stepId = postJson("/api/requests/" + requestId + "/submit", employee, "", HttpStatus.OK)
                 .get("approvalSteps").get(0).get("id").asLong();
 
         mockMvc.perform(post("/api/approvals/" + stepId + "/reject")
