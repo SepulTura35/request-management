@@ -238,6 +238,30 @@ Alanlar: sistem adı, erişim seviyesi, gerekçe.
 | Okuma / Yazma | Yönetici → Bilgi Teknolojileri |
 | Yönetici seviyesi | Yönetici → Bilgi Teknolojileri → Direktör |
 
+### Eşiklerin yapılandırılması
+
+Onay eşikleri koda gömülü değildir; `application.yml` üzerinden okunur ve dışarıdan geçersiz kılınabilir.
+
+```yaml
+app:
+  approval:
+    leave-hr-threshold-days: 3
+    expense-finance-threshold: 1000
+    expense-director-threshold: 5000
+    equipment-director-threshold: 50000
+    remote-work-hr-threshold-days: 5
+```
+
+Bir eşiği değiştirmek için yeniden derleme gerekmez:
+
+```bash
+java -jar request-management.jar --spring.profiles.active=prod   --app.approval.expense-finance-threshold=5000
+```
+
+Aynı jar ile ölçülen davranış: varsayılan eşikte 3.000 TL'lik masraf `Yönetici → Finans` zincirine girerken, eşik 5.000'e çekildiğinde yalnızca `Yönetici` onayına düşüyor.
+
+Erişim yetkisi kuralının sayısal eşiği yoktur; karar erişim seviyesine göre verilir, o yüzden yapılandırma dışındadır.
+
 ### Onaycının belirlenmesi
 
 Kural motoru yalnızca **hangi rollerin** onaylaması gerektiğine karar verir. O rolü hangi kişinin dolduracağı ayrı bir bileşenin işidir:

@@ -2,6 +2,7 @@ package com.enoca.requestmanagement;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -10,6 +11,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @SpringBootApplication
+@ConfigurationPropertiesScan
 public class RequestManagementApplication {
 
 	private static final List<String> PRODUCTION_REQUIRED_VARIABLES =

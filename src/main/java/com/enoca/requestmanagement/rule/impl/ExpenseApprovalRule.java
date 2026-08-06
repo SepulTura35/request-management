@@ -5,16 +5,18 @@ import com.enoca.requestmanagement.entity.detail.ExpenseRequestDetail;
 import com.enoca.requestmanagement.enums.RequestType;
 import com.enoca.requestmanagement.enums.Role;
 import com.enoca.requestmanagement.rule.ApprovalRuleEngine;
+import com.enoca.requestmanagement.rule.ApprovalThresholdProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class ExpenseApprovalRule implements ApprovalRuleEngine {
 
-    static final BigDecimal FINANCE_APPROVAL_THRESHOLD = new BigDecimal("1000");
-    static final BigDecimal DIRECTOR_APPROVAL_THRESHOLD = new BigDecimal("5000");
+    private final ApprovalThresholdProperties thresholds;
 
     @Override
     public RequestType supportedType() {
@@ -25,10 +27,10 @@ public class ExpenseApprovalRule implements ApprovalRuleEngine {
     public List<Role> determineApprovalChain(Request request) {
         BigDecimal amount = ((ExpenseRequestDetail) request.getDetail()).getAmount();
 
-        if (amount.compareTo(FINANCE_APPROVAL_THRESHOLD) <= 0) {
+        if (amount.compareTo(thresholds.expenseFinanceThreshold()) <= 0) {
             return List.of(Role.MANAGER);
         }
-        if (amount.compareTo(DIRECTOR_APPROVAL_THRESHOLD) <= 0) {
+        if (amount.compareTo(thresholds.expenseDirectorThreshold()) <= 0) {
             return List.of(Role.MANAGER, Role.FINANCE);
         }
         return List.of(Role.MANAGER, Role.FINANCE, Role.DIRECTOR);

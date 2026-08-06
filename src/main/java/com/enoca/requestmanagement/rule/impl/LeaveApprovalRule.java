@@ -5,14 +5,17 @@ import com.enoca.requestmanagement.entity.detail.LeaveRequestDetail;
 import com.enoca.requestmanagement.enums.RequestType;
 import com.enoca.requestmanagement.enums.Role;
 import com.enoca.requestmanagement.rule.ApprovalRuleEngine;
+import com.enoca.requestmanagement.rule.ApprovalThresholdProperties;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
+@RequiredArgsConstructor
 public class LeaveApprovalRule implements ApprovalRuleEngine {
 
-    static final int HR_APPROVAL_THRESHOLD_DAYS = 3;
+    private final ApprovalThresholdProperties thresholds;
 
     @Override
     public RequestType supportedType() {
@@ -23,7 +26,7 @@ public class LeaveApprovalRule implements ApprovalRuleEngine {
     public List<Role> determineApprovalChain(Request request) {
         LeaveRequestDetail detail = (LeaveRequestDetail) request.getDetail();
 
-        if (detail.getTotalDays() <= HR_APPROVAL_THRESHOLD_DAYS) {
+        if (detail.getTotalDays() <= thresholds.leaveHrThresholdDays()) {
             return List.of(Role.MANAGER);
         }
         return List.of(Role.MANAGER, Role.HR);

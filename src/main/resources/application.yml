@@ -18,6 +18,12 @@ server:
 app:
   jwt:
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  approval:
+    leave-hr-threshold-days: 3
+    expense-finance-threshold: 1000
+    expense-director-threshold: 5000
+    equipment-director-threshold: 50000
+    remote-work-hr-threshold-days: 5
   security:
     expose-api-docs: false
 
