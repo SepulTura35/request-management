@@ -2,6 +2,7 @@ package com.enoca.requestmanagement.config;
 
 import com.enoca.requestmanagement.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +27,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/api/auth/**",
+            "/api/auth/**"
+    };
+
+    private static final String[] API_DOC_ENDPOINTS = {
             "/swagger-ui/**",
             "/swagger-ui.html",
             "/api-docs/**"
@@ -43,15 +47,24 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Value("${app.security.expose-api-docs:false}")
+    private boolean exposeApiDocs;
+
     @Bean
     public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(STATIC_RESOURCES).permitAll()
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated())
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(STATIC_RESOURCES).permitAll()
+                            .requestMatchers(PUBLIC_ENDPOINTS).permitAll();
+
+                    if (exposeApiDocs) {
+                        auth.requestMatchers(API_DOC_ENDPOINTS).permitAll();
+                    }
+
+                    auth.anyRequest().authenticated();
+                })
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
