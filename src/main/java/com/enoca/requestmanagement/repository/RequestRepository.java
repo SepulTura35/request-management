@@ -4,10 +4,12 @@ import com.enoca.requestmanagement.entity.Request;
 import com.enoca.requestmanagement.entity.User;
 import com.enoca.requestmanagement.enums.RequestStatus;
 import com.enoca.requestmanagement.enums.RequestType;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -36,4 +38,8 @@ public interface RequestRepository extends JpaRepository<Request, Long>, JpaSpec
 
     @Query("SELECT COUNT(r) FROM Request r WHERE r.requestNumber LIKE :prefix%")
     long countByRequestNumberPrefix(@Param("prefix") String prefix);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT r FROM Request r WHERE r.id = :id")
+    Optional<Request> findByIdForUpdate(@Param("id") Long id);
 }
