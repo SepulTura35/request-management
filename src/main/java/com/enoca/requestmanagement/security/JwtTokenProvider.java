@@ -16,12 +16,40 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
+    private static final int MINIMUM_KEY_BYTES = 32;
+
     private final SecretKey signingKey;
     private final long expirationMs;
 
     public JwtTokenProvider(JwtProperties properties) {
-        this.signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(properties.secret()));
+        this.signingKey = Keys.hmacShaKeyFor(decodeSecret(properties.secret()));
         this.expirationMs = properties.expirationMs();
+    }
+
+    private static byte[] decodeSecret(String secret) {
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException(
+                    "JWT imza anahtari tanimli degil. JWT_SECRET ortam degiskenini ayarlayin. "
+                            + "Yeni bir anahtar uretmek icin: openssl rand -base64 48");
+        }
+
+        byte[] key;
+        try {
+            key = Decoders.BASE64.decode(secret.trim());
+        } catch (IllegalArgumentException ex) {
+            throw new IllegalStateException(
+                    "JWT imza anahtari gecerli bir Base64 degeri degil. "
+                            + "Yeni bir anahtar uretmek icin: openssl rand -base64 48", ex);
+        }
+
+        if (key.length < MINIMUM_KEY_BYTES) {
+            throw new IllegalStateException(
+                    "JWT imza anahtari cok kisa: %d bayt. HS256 icin en az %d bayt gerekir. "
+                            .formatted(key.length, MINIMUM_KEY_BYTES)
+                            + "Yeni bir anahtar uretmek icin: openssl rand -base64 48");
+        }
+
+        return key;
     }
 
     public String generateToken(String email, String role) {

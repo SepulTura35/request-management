@@ -83,6 +83,32 @@ H2 konsoluna bağlanmak için: JDBC URL `jdbc:h2:mem:requestdb`, kullanıcı `sa
 
 Bağlantı bilgileri `src/main/resources/application-prod.yml` içindedir (varsayılan: `localhost:5432/request_management`, kullanıcı `postgres`).
 
+`prod` profili **JWT imza anahtarını ortam değişkeninden bekler** ve verilmezse başlamaz:
+
+```bash
+export JWT_SECRET=$(openssl rand -base64 48)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=prod
+```
+
+### JWT imza anahtarı
+
+Anahtar kaynak koda gömülü değildir; `JWT_SECRET` ortam değişkeninden okunur.
+
+| Profil | Davranış |
+|---|---|
+| `dev` | Değişken tanımlı değilse geliştirmeye özel bir varsayılan kullanılır, kurulum gerektirmez |
+| `prod` | Varsayılan yoktur; değişken tanımlı değilse uygulama açılmayı reddeder |
+
+Anahtar her iki durumda da doğrulanır: Base64 çözülemiyorsa veya HS256 için gereken 32 baytın altındaysa uygulama açılışta net bir hatayla durur, zayıf anahtarla sessizce çalışmaya devam etmez.
+
+Yeni anahtar üretmek için:
+
+```bash
+openssl rand -base64 48
+```
+
+Token süresi de `JWT_EXPIRATION_MS` ile değiştirilebilir (varsayılan 24 saat).
+
 ### Testleri çalıştırma
 
 ```bash
