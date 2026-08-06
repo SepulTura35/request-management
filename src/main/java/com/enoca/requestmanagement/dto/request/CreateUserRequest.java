@@ -1,0 +1,34 @@
+package com.enoca.requestmanagement.dto.request;
+
+import com.enoca.requestmanagement.enums.Role;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+
+public record CreateUserRequest(
+
+        @NotBlank(message = "Ad zorunludur")
+        @Size(max = 50, message = "Ad en fazla 50 karakter olabilir")
+        String firstName,
+
+        @NotBlank(message = "Soyad zorunludur")
+        @Size(max = 50, message = "Soyad en fazla 50 karakter olabilir")
+        String lastName,
+
+        @NotBlank(message = "E-posta zorunludur")
+        @Email(message = "Gecerli bir e-posta adresi giriniz")
+        @Size(max = 150, message = "E-posta en fazla 150 karakter olabilir")
+        String email,
+
+        @NotBlank(message = "Sifre zorunludur")
+        @Size(min = 8, max = 100, message = "Sifre en az 8 karakter olmalidir")
+        String password,
+
+        @NotNull(message = "Rol zorunludur")
+        Role role,
+
+        @NotBlank(message = "Departman kodu zorunludur")
+        String departmentCode
+) {
+}

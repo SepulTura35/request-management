@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(callSuper = true)
+@ToString
 public class ExpenseRequestDetail extends RequestDetail {
 
     @Column(nullable = false, precision = 12, scale = 2)

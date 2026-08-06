@@ -19,7 +19,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(callSuper = true)
+@ToString
 public class RemoteWorkRequestDetail extends RequestDetail {
 
     @Column(nullable = false)

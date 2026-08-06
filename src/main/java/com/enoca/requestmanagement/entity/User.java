@@ -11,7 +11,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,8 +23,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = false, of = "id")
-@ToString(of = {"id", "firstName", "lastName", "email", "role"})
+@ToString(of = {"firstName", "lastName", "email", "role"})
 public class User extends BaseEntity {
 
     @Column(nullable = false, length = 50)

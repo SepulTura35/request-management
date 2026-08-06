@@ -18,7 +18,6 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -35,8 +34,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EqualsAndHashCode(callSuper = false, of = "id")
-@ToString(of = {"id", "requestNumber", "requestType", "status"})
+@ToString(of = {"requestNumber", "requestType", "status"})
 public class Request extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 30)

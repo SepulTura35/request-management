@@ -10,11 +10,9 @@ import jakarta.persistence.InheritanceType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 @Entity
 @Table(name = "request_details")
@@ -23,8 +21,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = false, of = "id")
-@ToString(of = "id")
 public abstract class RequestDetail extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
