@@ -3,13 +3,11 @@ package com.enoca.requestmanagement.service.impl;
 import com.enoca.requestmanagement.detail.RequestDetailHandler;
 import com.enoca.requestmanagement.detail.RequestDetailHandlerRegistry;
 import com.enoca.requestmanagement.dto.request.CreateRequestDto;
-import com.enoca.requestmanagement.dto.response.ApprovalStepResponse;
 import com.enoca.requestmanagement.dto.response.PageResponse;
 import com.enoca.requestmanagement.dto.response.RequestResponse;
 import com.enoca.requestmanagement.entity.ApprovalStep;
 import com.enoca.requestmanagement.entity.Request;
 import com.enoca.requestmanagement.entity.User;
-import com.enoca.requestmanagement.entity.detail.RequestDetail;
 import com.enoca.requestmanagement.enums.ApprovalStepStatus;
 import com.enoca.requestmanagement.enums.Priority;
 import com.enoca.requestmanagement.enums.RequestStatus;
@@ -17,6 +15,7 @@ import com.enoca.requestmanagement.enums.RequestType;
 import com.enoca.requestmanagement.enums.Role;
 import com.enoca.requestmanagement.exception.BusinessRuleException;
 import com.enoca.requestmanagement.exception.ResourceNotFoundException;
+import com.enoca.requestmanagement.mapper.RequestResponseMapper;
 import com.enoca.requestmanagement.repository.RequestRepository;
 import com.enoca.requestmanagement.rule.ApprovalRuleEngineRegistry;
 import com.enoca.requestmanagement.rule.ApproverResolver;
@@ -44,6 +43,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestDetailHandlerRegistry detailHandlerRegistry;
     private final ApprovalRuleEngineRegistry approvalRuleRegistry;
     private final ApproverResolver approverResolver;
+    private final RequestResponseMapper requestResponseMapper;
 
     @Override
     @Transactional
@@ -122,6 +122,8 @@ public class RequestServiceImpl implements RequestService {
         request.setStatus(RequestStatus.PENDING_APPROVAL);
         request.setSubmittedAt(LocalDateTime.now());
 
+        requestRepository.flush();
+
         return toResponse(request);
     }
 
@@ -165,6 +167,13 @@ public class RequestServiceImpl implements RequestService {
             throw new BusinessRuleException(
                     "Bu durumdaki bir talep iptal edilemez: " + request.getStatus());
         }
+
+        request.getApprovalSteps().stream()
+                .filter(step -> step.getStatus() == ApprovalStepStatus.PENDING)
+                .forEach(step -> {
+                    step.setStatus(ApprovalStepStatus.CANCELLED);
+                    step.setActionDate(LocalDateTime.now());
+                });
 
         request.setStatus(RequestStatus.CANCELLED);
         request.setResolvedAt(LocalDateTime.now());
@@ -213,26 +222,6 @@ public class RequestServiceImpl implements RequestService {
     }
 
     private RequestResponse toResponse(Request request) {
-        RequestDetail detail = request.getDetail();
-
-        List<ApprovalStepResponse> steps = request.getApprovalSteps().stream()
-                .map(ApprovalStepResponse::from)
-                .toList();
-
-        return new RequestResponse(
-                request.getId(),
-                request.getRequestNumber(),
-                request.getRequestType(),
-                request.getStatus(),
-                request.getPriority(),
-                request.getDescription(),
-                request.getRequester().getId(),
-                request.getRequester().getFullName(),
-                request.getRequester().getDepartment().getName(),
-                request.getCreatedAt(),
-                request.getSubmittedAt(),
-                request.getResolvedAt(),
-                detail == null ? null : detailHandlerRegistry.resolve(request.getRequestType()).toResponse(detail),
-                steps);
+        return requestResponseMapper.toResponse(request);
     }
 }
