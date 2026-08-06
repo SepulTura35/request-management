@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(callSuper = true)
+@ToString
 public class EquipmentRequestDetail extends RequestDetail {
 
     @Enumerated(EnumType.STRING)

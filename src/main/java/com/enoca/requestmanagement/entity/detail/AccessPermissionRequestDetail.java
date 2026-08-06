@@ -20,7 +20,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(callSuper = true)
+@ToString
 public class AccessPermissionRequestDetail extends RequestDetail {
 
     @Column(nullable = false, length = 100)

@@ -22,7 +22,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@ToString(callSuper = true)
+@ToString
 public class LeaveRequestDetail extends RequestDetail {
 
     @Enumerated(EnumType.STRING)
