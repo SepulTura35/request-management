@@ -9,18 +9,22 @@ import com.enoca.requestmanagement.entity.ApprovalStep;
 import com.enoca.requestmanagement.entity.Request;
 import com.enoca.requestmanagement.entity.User;
 import com.enoca.requestmanagement.enums.ApprovalStepStatus;
+import com.enoca.requestmanagement.enums.AuditAction;
 import com.enoca.requestmanagement.enums.Priority;
 import com.enoca.requestmanagement.enums.RequestStatus;
 import com.enoca.requestmanagement.enums.RequestType;
 import com.enoca.requestmanagement.enums.Role;
+import com.enoca.requestmanagement.event.AuditEvent;
 import com.enoca.requestmanagement.exception.BusinessRuleException;
 import com.enoca.requestmanagement.exception.ResourceNotFoundException;
 import com.enoca.requestmanagement.mapper.RequestResponseMapper;
 import com.enoca.requestmanagement.repository.RequestRepository;
 import com.enoca.requestmanagement.rule.ApprovalRuleEngineRegistry;
 import com.enoca.requestmanagement.rule.ApproverResolver;
+import com.enoca.requestmanagement.security.RequestAccessPolicy;
 import com.enoca.requestmanagement.service.RequestService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -44,6 +48,8 @@ public class RequestServiceImpl implements RequestService {
     private final ApprovalRuleEngineRegistry approvalRuleRegistry;
     private final ApproverResolver approverResolver;
     private final RequestResponseMapper requestResponseMapper;
+    private final RequestAccessPolicy accessPolicy;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -61,7 +67,10 @@ public class RequestServiceImpl implements RequestService {
 
         request.setDetail(handler.toEntity(dto));
 
-        return toResponse(requestRepository.save(request));
+        Request saved = requestRepository.save(request);
+        publish(AuditAction.REQUEST_CREATED, saved, requester, "Talep olusturuldu");
+
+        return toResponse(saved);
     }
 
     @Override
@@ -81,6 +90,8 @@ public class RequestServiceImpl implements RequestService {
         request.setDescription(dto.description());
         request.setPriority(dto.priority() == null ? Priority.MEDIUM : dto.priority());
         handler.updateEntity(request.getDetail(), dto);
+
+        publish(AuditAction.REQUEST_UPDATED, request, requester, "Taslak guncellendi");
 
         return toResponse(request);
     }
@@ -124,6 +135,9 @@ public class RequestServiceImpl implements RequestService {
 
         requestRepository.flush();
 
+        publish(AuditAction.REQUEST_SUBMITTED, request, requester,
+                "Onaya gonderildi, zincir: " + approvalChain);
+
         return toResponse(request);
     }
 
@@ -133,9 +147,7 @@ public class RequestServiceImpl implements RequestService {
         Request request = requestRepository.findByIdWithRequester(id)
                 .orElseThrow(() -> ResourceNotFoundException.of("Talep", id));
 
-        if (!canView(request, viewer)) {
-            throw new AccessDeniedException("Bu talebi goruntuleme yetkiniz yok");
-        }
+        accessPolicy.ensureCanView(request, viewer);
 
         return toResponse(request);
     }
@@ -178,6 +190,8 @@ public class RequestServiceImpl implements RequestService {
         request.setStatus(RequestStatus.CANCELLED);
         request.setResolvedAt(LocalDateTime.now());
 
+        publish(AuditAction.REQUEST_CANCELLED, request, requester, "Talep sahibi tarafindan iptal edildi");
+
         return toResponse(request);
     }
 
@@ -190,6 +204,9 @@ public class RequestServiceImpl implements RequestService {
             throw new BusinessRuleException(
                     "Yalnizca taslak durumundaki talepler silinebilir, gonderilmis talepler iptal edilmelidir");
         }
+
+        publish(AuditAction.REQUEST_DELETED, request, requester,
+                "Taslak silindi: " + request.getRequestNumber());
 
         requestRepository.delete(request);
     }
@@ -205,14 +222,9 @@ public class RequestServiceImpl implements RequestService {
         return request;
     }
 
-    private boolean canView(Request request, User viewer) {
-        if (request.getRequester().getId().equals(viewer.getId()) || viewer.getRole() == Role.ADMIN) {
-            return true;
-        }
-
-        return request.getApprovalSteps().stream()
-                .anyMatch(step -> step.getApprover() != null
-                        && step.getApprover().getId().equals(viewer.getId()));
+    private void publish(AuditAction action, Request request, User actor, String details) {
+        eventPublisher.publishEvent(
+                AuditEvent.of(action, "Request", request.getId(), actor.getId(), details));
     }
 
     private String nextRequestNumber() {
