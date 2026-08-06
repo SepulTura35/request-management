@@ -36,7 +36,7 @@ public class JwtTokenProvider {
         byte[] key;
         try {
             key = Decoders.BASE64.decode(secret.trim());
-        } catch (IllegalArgumentException ex) {
+        } catch (RuntimeException ex) {
             throw new IllegalStateException(
                     "JWT imza anahtari gecerli bir Base64 degeri degil. "
                             + "Yeni bir anahtar uretmek icin: openssl rand -base64 48", ex);

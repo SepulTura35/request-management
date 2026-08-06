@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/request_management
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/request_management}
     driver-class-name: org.postgresql.Driver
-    username: postgres
-    password: postgres
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
 
   jpa:
     hibernate:
@@ -11,7 +11,8 @@ spring:
     show-sql: false
 
   flyway:
-    locations: classpath:db/migration
+    locations: classpath:db/migration,classpath:db/migration-prod
+    ignore-migration-patterns: "*:missing"
 
   h2:
     console:
@@ -24,3 +25,11 @@ logging:
 app:
   jwt:
     secret: ${JWT_SECRET}
+  security:
+    expose-api-docs: false
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
