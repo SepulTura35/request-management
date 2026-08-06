@@ -3,9 +3,11 @@ package com.enoca.requestmanagement.controller;
 import com.enoca.requestmanagement.dto.request.CreateDepartmentRequest;
 import com.enoca.requestmanagement.dto.request.CreateUserRequest;
 import com.enoca.requestmanagement.dto.request.UpdateUserRoleRequest;
+import com.enoca.requestmanagement.dto.response.AuditLogResponse;
 import com.enoca.requestmanagement.dto.response.DepartmentResponse;
 import com.enoca.requestmanagement.dto.response.PageResponse;
 import com.enoca.requestmanagement.dto.response.UserResponse;
+import com.enoca.requestmanagement.service.AuditService;
 import com.enoca.requestmanagement.service.DepartmentService;
 import com.enoca.requestmanagement.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -38,6 +40,7 @@ public class AdminController {
 
     private final UserService userService;
     private final DepartmentService departmentService;
+    private final AuditService auditService;
 
     @GetMapping("/users")
     @Operation(summary = "Kullanicilari sayfali olarak listeler")
@@ -70,6 +73,13 @@ public class AdminController {
     public ResponseEntity<UserResponse> updateUserStatus(@PathVariable Long id,
                                                          @RequestParam boolean active) {
         return ResponseEntity.ok(userService.setActive(id, active));
+    }
+
+    @GetMapping("/audit-logs")
+    @Operation(summary = "Sistem genelindeki islem kayitlarini sayfali olarak listeler")
+    public ResponseEntity<PageResponse<AuditLogResponse>> listAuditLogs(
+            @PageableDefault(size = 30) Pageable pageable) {
+        return ResponseEntity.ok(auditService.findAll(pageable));
     }
 
     @GetMapping("/departments")

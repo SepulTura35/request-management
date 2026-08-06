@@ -9,7 +9,9 @@ import com.enoca.requestmanagement.entity.ApprovalStep;
 import com.enoca.requestmanagement.entity.Request;
 import com.enoca.requestmanagement.entity.User;
 import com.enoca.requestmanagement.enums.ApprovalStepStatus;
+import com.enoca.requestmanagement.enums.AuditAction;
 import com.enoca.requestmanagement.enums.RequestStatus;
+import com.enoca.requestmanagement.event.AuditEvent;
 import com.enoca.requestmanagement.exception.BusinessRuleException;
 import com.enoca.requestmanagement.exception.ResourceNotFoundException;
 import com.enoca.requestmanagement.mapper.RequestResponseMapper;
@@ -18,6 +20,7 @@ import com.enoca.requestmanagement.repository.RequestRepository;
 import com.enoca.requestmanagement.rule.ApproverResolver;
 import com.enoca.requestmanagement.service.ApprovalService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -35,6 +38,7 @@ public class ApprovalServiceImpl implements ApprovalService {
     private final RequestRepository requestRepository;
     private final ApproverResolver approverResolver;
     private final RequestResponseMapper requestResponseMapper;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -53,6 +57,9 @@ public class ApprovalServiceImpl implements ApprovalService {
             request.setResolvedAt(LocalDateTime.now());
         }
 
+        publish(AuditAction.APPROVAL_APPROVED, request, approver,
+                step.getStepOrder() + ". adim (" + step.getApproverRole() + ") onaylandi");
+
         return requestResponseMapper.toResponse(request);
     }
 
@@ -67,6 +74,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 
         request.setStatus(RequestStatus.REJECTED);
         request.setResolvedAt(LocalDateTime.now());
+
+        publish(AuditAction.APPROVAL_REJECTED, request, approver,
+                step.getStepOrder() + ". adim (" + step.getApproverRole() + ") reddedildi: " + action.comment());
 
         return requestResponseMapper.toResponse(request);
     }
@@ -85,6 +95,11 @@ public class ApprovalServiceImpl implements ApprovalService {
         return PageResponse.from(
                 approvalStepRepository.findResolvedByApprover(approver, pageable),
                 PendingApprovalResponse::from);
+    }
+
+    private void publish(AuditAction action, Request request, User actor, String details) {
+        eventPublisher.publishEvent(
+                AuditEvent.of(action, "Request", request.getId(), actor.getId(), details));
     }
 
     private ApprovalStep loadActionableStep(Long stepId, User approver) {
