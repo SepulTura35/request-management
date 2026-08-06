@@ -16,12 +16,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Base class for type-specific request payloads. Each {@link com.enoca.requestmanagement.enums.RequestType}
- * has its own subclass/table (JOINED inheritance), so adding a new request type never touches
- * the {@link Request} table or existing detail subclasses. The {@code request} link is set by
- * {@link Request#setDetail(RequestDetail)}, so subclass builders only need their own fields.
- */
 @Entity
 @Table(name = "request_details")
 @Inheritance(strategy = InheritanceType.JOINED)

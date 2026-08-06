@@ -17,10 +17,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-/**
- * Immutable trail of who did what, when. Written by services (not derived from other tables),
- * so it survives even if the acted-upon entity is later modified or deleted.
- */
 @Entity
 @Table(name = "audit_logs")
 @Getter
