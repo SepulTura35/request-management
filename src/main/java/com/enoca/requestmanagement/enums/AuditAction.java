@@ -1,0 +1,13 @@
+package com.enoca.requestmanagement.enums;
+
+public enum AuditAction {
+    USER_REGISTERED,
+    REQUEST_CREATED,
+    REQUEST_UPDATED,
+    REQUEST_SUBMITTED,
+    REQUEST_CANCELLED,
+    REQUEST_DELETED,
+    APPROVAL_APPROVED,
+    APPROVAL_REJECTED,
+    COMMENT_ADDED
+}
