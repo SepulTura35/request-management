@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    name: Derleme ve testler
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Depoyu al
+        uses: actions/checkout@v4
+
+      - name: JDK 17 kur
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+          cache: maven
+
+      - name: Testleri calistir
+        run: ./mvnw --batch-mode --no-transfer-progress verify
+
+      - name: Testcontainers testinin atlanmadigini dogrula
+        run: |
+          report=target/surefire-reports/com.enoca.requestmanagement.PostgresMigrationTest.txt
+          if [ ! -f "$report" ]; then
+            echo "::error::PostgresMigrationTest raporu bulunamadi."
+            exit 1
+          fi
+          if grep -qE "Skipped: [1-9]" "$report"; then
+            echo "::error::PostgresMigrationTest atlandi; bu is akisinda Docker calisir durumda olmali."
+            cat "$report"
+            exit 1
+          fi
+          cat "$report"
+
+      - name: Test raporlarini yukle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+          retention-days: 7

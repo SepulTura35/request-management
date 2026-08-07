@@ -19,6 +19,7 @@ Sistemin çekirdek fikri şu: 750 TL'lik bir masraf ile 12.000 TL'lik bir masraf
 - [Mimari tercihler](#mimari-tercihler)
 - [Ek özellikler](#ek-özellikler)
 - [Testler](#testler)
+- [Sürekli entegrasyon](#sürekli-entegrasyon)
 - [Proje yapısı](#proje-yapısı)
 
 ---
@@ -163,6 +164,18 @@ Hata testleri yalnızca durum kodunu değil, cevabın `com.enoca`, `com.fasterxm
 `PostgresMigrationTest` gerçek bir PostgreSQL konteynerinde çalışır: production migration setinin eksiksiz uygulandığını, demo hesap oluşturmadığını, sequence'in ve CHECK kısıtlarının çalıştığını doğrular.
 
 Test `@Testcontainers(disabledWithoutDocker = true)` ile işaretlidir; Docker bulunmayan ortamda derlenir ama atlanır, build kırılmaz. Yukarıdaki `Skipped: 5` bundandır.
+
+Bu test geliştirme makinesinde atlanıyor: Docker Engine 29 ile Testcontainers'ın gömülü istemcisi arasında bir uyumsuzluk var — daemon `docker` komutlarına cevap veriyor ama istemcinin `/info` çağrısı boş gövdeyle 400 dönüyor. npipe, `dockerDesktopLinuxEngine`, `tcp://localhost:2375` ve sabitlenmiş API sürümü denendi, sonuç değişmedi.
+
+Bu yüzden test **CI'da** koşturuluyor (aşağıya bakın). Ayrıca iddia ettiği her madde bir kez elle doğrulandı: `postgres:16-alpine` konteyneri ayağa kaldırılıp uygulama prod profiliyle bağlandı — 8 migration uygulandı, `users` tablosu boş kaldı, sequence ve `version` kolonları çalıştı, yedi CHECK kısıtı da zorlandı.
+
+### Sürekli entegrasyon
+
+`.github/workflows/ci.yml`, `main`'e giden her push ve her pull request'te Ubuntu üzerinde `./mvnw verify` çalıştırır.
+
+CI ortamında Docker sorunsuz çalıştığı için `PostgresMigrationTest` **gerçekten koşar**. İş akışı bunu ayrıca denetler: testin atlandığını görürse build'i kırar. Yani "Docker yoktu, atlandı" durumu sessizce normale dönemez.
+
+Test raporları her koşuda artifact olarak yüklenir; başarısız bir koşuda ayrıntıya Actions sekmesinden ulaşılabilir.
 
 ---
 
