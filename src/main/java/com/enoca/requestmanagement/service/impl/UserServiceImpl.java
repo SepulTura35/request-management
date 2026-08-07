@@ -5,6 +5,7 @@ import com.enoca.requestmanagement.dto.request.UpdateUserRoleRequest;
 import com.enoca.requestmanagement.dto.response.PageResponse;
 import com.enoca.requestmanagement.dto.response.UserResponse;
 import com.enoca.requestmanagement.entity.User;
+import com.enoca.requestmanagement.enums.Role;
 import com.enoca.requestmanagement.exception.BusinessRuleException;
 import com.enoca.requestmanagement.exception.ResourceNotFoundException;
 import com.enoca.requestmanagement.repository.UserRepository;
@@ -60,6 +61,9 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse updateRole(Long id, UpdateUserRoleRequest request) {
         User user = getEntityById(id);
+        if (user.getRole() == Role.ADMIN && request.role() != Role.ADMIN && user.isActive()) {
+            ensureAnotherActiveAdminExists();
+        }
         user.setRole(request.role());
         return UserResponse.from(user);
     }
@@ -68,8 +72,19 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserResponse setActive(Long id, boolean active) {
         User user = getEntityById(id);
+        if (!active && user.isActive() && user.getRole() == Role.ADMIN) {
+            ensureAnotherActiveAdminExists();
+        }
         user.setActive(active);
         return UserResponse.from(user);
+    }
+
+    private void ensureAnotherActiveAdminExists() {
+        if (userRepository.countByRoleAndActiveTrue(Role.ADMIN) <= 1) {
+            throw new BusinessRuleException(
+                    "Sistemdeki son aktif yönetici pasifleştirilemez veya yetkisi düşürülemez. "
+                            + "Önce başka bir yöneticiyi aktif edin.");
+        }
     }
 
     @Override

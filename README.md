@@ -17,6 +17,7 @@ Sistemin çekirdek fikri şu: 750 TL'lik bir masraf ile 12.000 TL'lik bir masraf
 - [API endpointleri](#api-endpointleri)
 - [Web arayüzü](#web-arayüzü)
 - [Mimari tercihler](#mimari-tercihler)
+- [Güvenlik](#güvenlik)
 - [Ek özellikler](#ek-özellikler)
 - [Testler](#testler)
 - [Sürekli entegrasyon](#sürekli-entegrasyon)
@@ -158,7 +159,7 @@ Token süresi de `JWT_EXPIRATION_MS` ile değiştirilebilir (varsayılan 24 saat
 ### Testler
 
 ```
-Tests run: 95, Failures: 0, Errors: 0, Skipped: 5
+Tests run: 109, Failures: 0, Errors: 0, Skipped: 5
 ```
 
 | Test sınıfı | Adet | Kapsam |
@@ -175,6 +176,9 @@ Tests run: 95, Failures: 0, Errors: 0, Skipped: 5
 | `MigrationSafetyTest` | 4 | Demo verinin ortak klasöre sızmaması |
 | `AdminBootstrapperTest` | 8 | İlk yönetici kuralları, eksik ve zayıf yapılandırma |
 | `AdminBootstrapIntegrationTest` | 3 | Boş şemada yönetici oluşumu ve gerçekten giriş yapabilmesi |
+| `LoginAttemptServiceTest` | 6 | Giriş deneme sınırı: eşik, sıfırlama, süre dolması, e-posta izolasyonu |
+| `UserServiceImplTest` | 5 | Son aktif yöneticinin korunması |
+| `SecurityHardeningIntegrationTest` | 3 | Pasif kullanıcı token'ı, giriş hız sınırı, kayıt sızıntısı |
 | `RequestApprovalFlowIntegrationTest` | 4 | Uçtan uca gerçek uygulama |
 | `PostgresMigrationTest` | 5 | Gerçek PostgreSQL üzerinde şema, sequence, kısıtlar (Docker gerektirir) |
 | `RequestManagementApplicationTests` | 1 | Context yüklenmesi |
@@ -636,6 +640,44 @@ Yine de submit anında zincirin **tamamı** çözülebiliyor mu diye kontrol edi
 
 ---
 
+## Güvenlik
+
+Projeye mentör geri bildiriminin ardından bir de kendi güvenlik denetimimizi uyguladık. Aşağıda hem alınan önlemler hem de **bilinçli olarak kapsam dışı bırakılan** kararlar açıkça yazılıdır — çünkü bir açığın bilinip bilinmediği, açığın kendisi kadar önemlidir.
+
+### Kimlik doğrulama ve yetkilendirme
+
+- Parolalar **BCrypt** ile saklanır; hiçbir yerde düz metin tutulmaz, loglara parola düşmez.
+- Kimlik doğrulama **JWT** ile yürür (HS256). İmza anahtarı koda gömülü değildir, doğrulanır (bkz. [JWT imza anahtarı](#jwt-imza-anahtarı)).
+- Yetkilendirme iki katmanlıdır: uç bazında `@PreAuthorize("hasRole('ADMIN')")` + metot güvenliği; kayıt bazında `RequestAccessPolicy` — bir talebi yalnızca **sahibi, atanmış onaycısı veya bir ADMIN** görebilir.
+- Dışarıdan kayıt her zaman `EMPLOYEE` rolü atar; kayıt yoluyla yetki yükseltme mümkün değildir.
+
+### Alınan önlemler
+
+| Önlem | Ne yapar |
+|---|---|
+| **Pasif kullanıcı anında dışarıda** | JWT filtresi her istekte kullanıcının aktifliğini kontrol eder. Bir kullanıcı pasifleştirildiği an, elindeki geçerli token'la bile 401 alır — token'ın süresinin dolmasını beklemez. |
+| **Giriş deneme sınırı** | Aynı e-posta için art arda 5 başarısız girişten sonra 15 dakikalık geçici kilit; altıncı deneme `429 Too Many Requests` döner. Kaba kuvvet saldırısını yavaşlatır. |
+| **Son yönetici koruması** | Sistemdeki son aktif `ADMIN` pasifleştirilemez ve yetkisi düşürülemez; aksi halde sistem yönetilemez hale gelirdi. |
+| **Kayıt sızıntısının kapatılması** | Var olan bir e-postayla kayıt denemesi, e-postayı geri yansıtmayan nötr bir mesaj döner; bir saldırgan hangi e-postaların kayıtlı olduğunu böyle öğrenemez. |
+| **Hata mesajı sızıntısı yok** | Cevaplar `com.enoca`, `com.fasterxml` gibi iç detay taşımaz (bkz. [Mimari tercihler](#mimari-tercihler)). |
+| **Gereksiz yüzey kapalı** | Actuator yok, CORS tanımlı değil (aynı origin), Swagger ve `/api-docs` prod'da kapalı. |
+
+### Bilinçli kapsam kararları
+
+Aşağıdakiler tespit edildi ve bu proje için **bilerek** şu şekilde bırakıldı:
+
+| Konu | Karar ve gerekçe |
+|---|---|
+| **Dışarıdan kayıt açık** | `/api/auth/register` herkese açık; departman kodunu bilen biri `EMPLOYEE` hesabı açabilir. Kurumsal bir kurulumda kaydı yalnızca ADMIN'e bırakmak (`POST /api/admin/users`) tercih edilirdi. Rol yükseltme mümkün olmadığından risk sınırlıdır; kapatma tek satırlık bir güvenlik yapılandırması değişikliğidir. |
+| **Token iptali (stateless)** | Çıkışta token sunucu tarafında geçersizleşmez, süresi dolana kadar geçerlidir. Tam çözüm bir kara liste + kısa ömürlü/refresh token gerektirir. Pasif kullanıcı kontrolü bu riski büyük ölçüde kapatır; kalan pencere token süresiyle (`JWT_EXPIRATION_MS`) sınırlıdır. |
+| **Token `localStorage`'da** | Arayüz token'ı `localStorage`'da tutar; bir XSS açığı çıkarsa çalınabilir. Şu an XSS vektörü yoktur (tüm metin `textContent` ile basılır, `innerHTML` kullanılmaz). Üretimde `HttpOnly` cookie daha güvenli olurdu. |
+
+### Doğrulama
+
+Bu bölümün iddiaları testlerle doğrulanır: `LoginAttemptServiceTest`, `UserServiceImplTest` ve `SecurityHardeningIntegrationTest` — pasif kullanıcının token'ı gerçekten 401 alır, altıncı hatalı giriş gerçekten 429 döner, son yönetici gerçekten pasifleştirilemez.
+
+---
+
 ## Ek özellikler
 
 Minimum gereksinimlerin ötesinde üç özellik eklendi.
@@ -661,31 +703,6 @@ Tüm liste endpointleri `page`, `size` ve `sort` parametrelerini destekler. Ceva
 
 ---
 
-## Testler
-
-```
-Tests run: 57, Failures: 0, Errors: 0, Skipped: 0
-```
-
-| Test sınıfı | Adet | Kapsam |
-|---|---|---|
-| `ApprovalRuleEngineTest` | 19 | Beş talep tipinin onay eşikleri |
-| `ApproverResolverTest` | 6 | Rol → kişi çözümleme, kendi talebini onaylayamama, direktöre yükseltme |
-| `ApprovalRuleEngineRegistryTest` | 3 | Registry indeksleme, eksik tip, çift kayıt |
-| `RequestDetailHandlerTest` | 8 | Tip bazlı alan kuralları, gün hesabı, yerinde güncelleme |
-| `RequestServiceImplTest` | 8 | Submit zinciri, durum geçişleri, sahiplik |
-| `ApprovalServiceImplTest` | 8 | Onay / red, zincir ilerletme, dört koruma kuralı |
-| `RequestApprovalFlowIntegrationTest` | 4 | Uçtan uca gerçek uygulama |
-| `RequestManagementApplicationTests` | 1 | Context yüklenmesi |
-
-Eşikler **tam sınır değerleriyle** test edilir: 3 gün / 4 gün, 1.000,00 / 1.000,01, 5.000,00 / 5.000,01. Ortadan seçilen bir değer, eşiğin bir birim kaymasını yakalayamaz.
-
-Servis testleri metot çağrılarını değil **sonuç durumunu** doğrular. Örneğin submit sonrası: her rol için bir adım, doğru sırada, onaycı yalnızca ilk adımda. Aynı bağımlılıkları kullanan ama sonucu bozan bir değişiklik yine de yakalanır.
-
-Entegrasyon testi gerçek uygulamayı ayağa kaldırır; Flyway, seed verisi, Spring Security, JWT filtresi, kural motoru ve JPA birlikte çalışır. 12.000 TL'lik bir masraf talebi kullanıcının yapacağı gibi sürülür ve üç adımda onaylanır.
-
----
-
 ## Proje yapısı
 
 ```
@@ -706,7 +723,7 @@ src/main/java/com/enoca/requestmanagement/
 ├── repository/        Spring Data JPA repository'leri
 ├── rule/              ApprovalRuleEngine arayüzü, registry, ApproverResolver
 │   └── impl/          Beş talep tipinin onay kuralı
-├── security/          JWT üretimi/doğrulaması, filtre, erişim politikası
+├── security/          JWT üretimi/doğrulaması, filtre, erişim politikası, giriş deneme sınırı
 └── service/           Servis arayüzleri
     └── impl/          Servis implementasyonları
 

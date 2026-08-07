@@ -7,7 +7,6 @@ const UI = (() => {
             if (value === null || value === undefined || value === false) return;
             if (key === 'class') node.className = value;
             else if (key === 'text') node.textContent = value;
-            else if (key === 'html') node.innerHTML = value;
             else if (key.startsWith('on')) node.addEventListener(key.slice(2).toLowerCase(), value);
             else if (value === true) node.setAttribute(key, '');
             else node.setAttribute(key, value);
