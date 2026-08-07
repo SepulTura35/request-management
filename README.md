@@ -107,6 +107,34 @@ Veritabanı adresi `DB_URL` ile değiştirilebilir (varsayılan `jdbc:postgresql
 
 `prod` profilinde Swagger arayüzü ve `/api-docs` **kapalıdır**; hem springdoc devre dışı bırakılır hem de güvenlik yapılandırması bu yolları herkese açık listeye almaz.
 
+### İlk yönetici hesabı
+
+Temiz bir üretim veritabanında hiç kullanıcı ve hiç departman yoktur. Bu bir kilit yaratır: kayıt ucu mevcut bir departman seçilmesini ister, departman oluşturan uçlar ise `ADMIN` rolü ister. Yani sisteme girebilecek ilk kişi kendiliğinden oluşmaz.
+
+Demo hesapları üretime taşımak bu kilidi açardı ama üretimde parolası herkesçe bilinen hesaplar bırakırdı. Onun yerine uygulama, veritabanı **tamamen boşken** bir kereye mahsus ilk yöneticiyi oluşturabilir:
+
+```bash
+export APP_BOOTSTRAP_ADMIN_EMAIL=admin@sirket.com
+export APP_BOOTSTRAP_ADMIN_PASSWORD='...'
+java -jar target/request-management-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+```
+
+Bir `Yönetim` departmanı (`MGMT`) ve bu bilgilerle bir `ADMIN` kullanıcı oluşur. Parola BCrypt ile saklanır; hiçbir yerde düz metin tutulmaz. Hesap oluştuktan sonra değişkenler kaldırılabilir.
+
+| Durum | Davranış |
+|---|---|
+| Veritabanı boş, değişkenler tanımlı | Departman ve `ADMIN` oluşturulur |
+| Veritabanı boş, değişkenler tanımsız | Uygulama açılır, logda ne yapılması gerektiğini anlatan bir uyarı bırakır |
+| Veritabanında kullanıcı var | Hiçbir şey yapılmaz, değişkenler tanımlı olsa bile |
+| Yalnızca biri tanımlı | Uygulama açılmaz — yarım yapılandırma sessizce yok sayılmaz |
+| Parola 12 karakterden kısa | Uygulama açılmaz |
+
+Bootstrap'ın tetikleyicisi **kullanıcı sayısının sıfır olması**. Sistem kullanılmaya başlandıktan sonra bu değişkenler geride kalsa bile yeni bir yönetici oluşmaz; unutulmuş bir ortam değişkeni arka kapıya dönüşmez.
+
+Eşik değerleri de yapılandırılabilir: `APP_BOOTSTRAP_DEPARTMENT_NAME`, `APP_BOOTSTRAP_DEPARTMENT_CODE`, `APP_BOOTSTRAP_ADMIN_FIRST_NAME`, `APP_BOOTSTRAP_ADMIN_LAST_NAME`, `APP_BOOTSTRAP_MINIMUM_PASSWORD_LENGTH`.
+
+`dev` profilinde bu mekanizma hiç devreye girmez, çünkü demo verisi zaten kullanıcı oluşturur.
+
 ### JWT imza anahtarı
 
 Anahtar kaynak koda gömülü değildir; `JWT_SECRET` ortam değişkeninden okunur.
@@ -129,7 +157,7 @@ Token süresi de `JWT_EXPIRATION_MS` ile değiştirilebilir (varsayılan 24 saat
 ### Testler
 
 ```
-Tests run: 84, Failures: 0, Errors: 0, Skipped: 5
+Tests run: 95, Failures: 0, Errors: 0, Skipped: 5
 ```
 
 | Test sınıfı | Adet | Kapsam |
@@ -144,6 +172,8 @@ Tests run: 84, Failures: 0, Errors: 0, Skipped: 5
 | `ConcurrencyIntegrationTest` | 4 | Paralel gönderme / onay / iptal, numara benzersizliği |
 | `ErrorResponseIntegrationTest` | 7 | Bozuk girdi, iç detay sızıntısı, çakışma |
 | `MigrationSafetyTest` | 4 | Demo verinin ortak klasöre sızmaması |
+| `AdminBootstrapperTest` | 8 | İlk yönetici kuralları, eksik ve zayıf yapılandırma |
+| `AdminBootstrapIntegrationTest` | 3 | Boş şemada yönetici oluşumu ve gerçekten giriş yapabilmesi |
 | `RequestApprovalFlowIntegrationTest` | 4 | Uçtan uca gerçek uygulama |
 | `PostgresMigrationTest` | 5 | Gerçek PostgreSQL üzerinde şema, sequence, kısıtlar (Docker gerektirir) |
 | `RequestManagementApplicationTests` | 1 | Context yüklenmesi |
@@ -647,6 +677,7 @@ Entegrasyon testi gerçek uygulamayı ayağa kaldırır; Flyway, seed verisi, Sp
 
 ```
 src/main/java/com/enoca/requestmanagement/
+├── bootstrap/         Boş veritabanında ilk yöneticiyi oluşturan çalıştırıcı
 ├── config/            SecurityConfig, JwtProperties, OpenApiConfig, JpaAuditingConfig
 ├── controller/        Auth, User, Request, Approval, RequestComment, Admin
 ├── detail/            RequestDetailHandler arayüzü + registry
@@ -667,7 +698,9 @@ src/main/java/com/enoca/requestmanagement/
     └── impl/          Servis implementasyonları
 
 src/main/resources/
-├── db/migration/      Flyway migration dosyaları (V1–V5)
+├── db/migration/      Her ortamda çalışan şema migration'ları
+├── db/migration-dev/  Demo veri (yalnızca dev)
+├── db/migration-prod/ Demo hesap temizliği (yalnızca prod)
 ├── static/            Web arayüzü (HTML, CSS, JS)
 └── application*.yml   Ortak, dev ve prod yapılandırmaları
 
